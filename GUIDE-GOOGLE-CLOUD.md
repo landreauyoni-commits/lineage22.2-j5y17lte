@@ -30,15 +30,25 @@ L'essai n'est possible que si tu n'as jamais été client payant de Google Cloud
 
 Les comptes d'essai ont parfois un quota de processeurs réduit.
 
-1. Dans la barre de recherche en haut de la console, tape **Quotas** →
-   ouvre **Quotas et limites système** (*IAM et administration*).
-2. Dans le filtre, tape `CPUs` et regarde la ligne **CPUs (all regions)**.
+1. **Active d'abord Compute Engine** (sinon ses quotas n'apparaissent nulle
+   part) : menu ☰ → **Compute Engine** → bouton **Activer** → attends 1 à 2 min
+   que la page « Instances de VM » s'affiche.
+2. Ouvre **Cloud Shell** : l'icône **>_** en haut à droite de la console. Un
+   terminal gratuit s'ouvre en bas de la page (autorise-le si on te le demande).
+3. Copie-colle cette commande :
 
-- Valeur **≥ 16** → tu prendras le serveur `n2-standard-16` (plus rapide).
-- Valeur **8 à 15** → tu prendras `n2-standard-8` (plus lent, tout aussi gratuit).
+```bash
+gcloud compute regions describe europe-west1 --flatten=quotas --format="table(quotas.metric,quotas.limit)" | grep -E "^(CPUS|N2_CPUS) "
+```
 
-Si la page demande d'activer l'API Compute Engine, clique sur **Activer** et
-attends une minute.
+Regarde le **plus petit** des deux nombres affichés (`CPUS` et `N2_CPUS`) :
+
+- **≥ 16** → tu prendras le serveur `n2-standard-16` (plus rapide).
+- **8 à 15** → tu prendras `n2-standard-8` (plus lent, tout aussi gratuit).
+
+Autre méthode, sans commande : crée directement la VM en `n2-standard-16`
+(étape 3). Si Google refuse avec un message de **quota**, recommence en
+`n2-standard-8`.
 
 ## Étape 3 — Créer le serveur (5 min)
 
@@ -127,7 +137,7 @@ Sans ça, le serveur continue de consommer ton crédit (~10 à 20 $ par jour).
 | La compilation s'arrête sur une erreur | `tail -n 80 ~/build.log` et envoie-moi ces lignes. Après correction : `SKIP_SYNC=1 LOW_DISK=1 ./build.sh 2>&1 \| tee ~/build.log` |
 | Blobs propriétaires manquants | `SKIP_SYNC=1 LOW_DISK=1 REGEN_BLOBS=1 ./build.sh 2>&1 \| tee ~/build.log` |
 | Tu dois t'absenter plusieurs jours en plein dépannage | **Arrêter** la VM (pas supprimer) : le processeur n'est plus facturé, seul le disque l'est (~2 $/jour) |
-| Création refusée « quota dépassé » | Prends `n2-standard-8` (étape 2) |
+| Création refusée « quota dépassé » | Prends `n2-standard-8` |
 | Voir le crédit restant | Menu ☰ → **Facturation** → **Présentation** |
 
 Une fois le `.zip` récupéré, l'installation sur le téléphone est décrite dans
