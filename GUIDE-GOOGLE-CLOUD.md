@@ -82,8 +82,10 @@ cd lineage22.2-j5y17lte && LOW_DISK=1 ./build.sh 2>&1 | tee ~/build.log
 ```
 
 `tmux` garde la compilation en vie même si tu fermes l'onglet ou éteins ton PC.
+Tu es bien dans `tmux` si une **barre verte** s'affiche en bas du terminal.
 
-- **Se détacher** (laisser tourner) : `Ctrl + b`, relâche, puis `d`.
+- **Laisser tourner** : ferme simplement l'onglet SSH. (Le raccourci tmux
+  `Ctrl + b` puis `d` est souvent intercepté par le navigateur : inutile ici.)
 - **Revenir voir plus tard** : rouvre **SSH**, puis :
 
 ```bash
