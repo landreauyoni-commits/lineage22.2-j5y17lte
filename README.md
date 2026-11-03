@@ -34,8 +34,16 @@ est présente dans la branche noyau 22.2, et toutes les options attendues par la
 plateforme commune sont définies par le J5 (seules différences avec l'A3 :
 ampli TFA9890 au lieu de 9896, pas de radio FM).
 
-Ce qui **n'a pas** été vérifié : la compilation complète et le démarrage sur
-un vrai téléphone.
+**Noyau compilé avec succès** (test du 3 nov. 2026) : branche `lineage-22.2`
+au commit `1606da29`, `exynos7870-j5y17lte_defconfig`, GCC 4.9 de LineageOS
+(comme le fait `build.sh`). Résultat : Linux 3.18.140 arm64 (`Image` 19,7 Mo)
+et 6 DTB `exynos7870-j5y17lte_eur_open_00…07` (révisions de carte du modèle
+européen), sans erreur. Les options eBPF requises par Android 15 sont
+activées : `BPF_SYSCALL`, `CGROUP_BPF`, `BPF_JIT`, `NETFILTER_XT_MATCH_BPF`,
+`NET_CLS_BPF`, `NET_ACT_BPF`.
+
+Ce qui **n'a pas** été vérifié : la compilation de la ROM complète et le
+démarrage sur un vrai téléphone.
 
 ## Contenu
 
