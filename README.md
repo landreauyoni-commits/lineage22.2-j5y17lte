@@ -62,8 +62,18 @@ démarrage sur un vrai téléphone.
 
 ## Compiler
 
+> Pas assez de place sur ton PC ? Compile gratuitement sur un serveur
+> Google Cloud : **[GUIDE-GOOGLE-CLOUD.md](GUIDE-GOOGLE-CLOUD.md)**.
+
 ```bash
 ./build.sh
+```
+
+Mode économe (~200-250 Go au lieu de ~300 Go : sources sans historique Git,
+pas de cache de compilation) :
+
+```bash
+LOW_DISK=1 ./build.sh
 ```
 
 Résultat : `~/android/lineage/out/target/product/j5y17lte/lineage-22.2-AAAAMMJJ-UNOFFICIAL-j5y17lte.zip`

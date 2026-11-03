@@ -6,6 +6,8 @@
 #   REGEN_BLOBS=1 ./build.sh   régénère vendor/samsung/j5y17lte depuis les dumps
 #                              publics du firmware J530F (quelques Go en plus)
 #   SKIP_SYNC=1  ./build.sh    recompile sans refaire repo sync
+#   LOW_DISK=1   ./build.sh    économise ~80-100 Go : sources sans historique Git
+#                              (--depth=1) et pas de cache ccache (~200-250 Go suffisent)
 set -euo pipefail
 KIT="$(cd "$(dirname "$0")" && pwd)"
 SRC="${1:-$HOME/android/lineage}"
@@ -28,10 +30,12 @@ if ! command -v repo >/dev/null; then
 fi
 git config --global user.name  >/dev/null || git config --global user.name  "builder"
 git config --global user.email >/dev/null || git config --global user.email "builder@localhost"
+git config --global color.ui >/dev/null || git config --global color.ui auto   # évite la question de repo init
 
 step "2/7 Sources LineageOS 22.2"
 mkdir -p "$SRC" && cd "$SRC"
-[ -d .repo ] || repo init -u https://github.com/LineageOS/android.git -b lineage-22.2 --git-lfs --no-clone-bundle
+DEPTH=(); [ "${LOW_DISK:-0}" = 1 ] && DEPTH=(--depth=1)
+[ -d .repo ] || repo init -u https://github.com/LineageOS/android.git -b lineage-22.2 --git-lfs --no-clone-bundle "${DEPTH[@]}"
 mkdir -p .repo/local_manifests
 cp "$KIT/local_manifests/j5y17lte.xml" .repo/local_manifests/
 
@@ -55,9 +59,14 @@ else
   step "5/7 Blobs : vendor/samsung/j5y17lte du dépôt communautaire (REGEN_BLOBS=1 pour régénérer)"
 fi
 
-step "6/7 Cache de compilation"
-export USE_CCACHE=1 CCACHE_EXEC="$(command -v ccache)"
-ccache -M 50G >/dev/null
+if [ "${LOW_DISK:-0}" = 1 ]; then
+  step "6/7 Cache de compilation : désactivé (LOW_DISK=1)"
+  export USE_CCACHE=0
+else
+  step "6/7 Cache de compilation (50 Go)"
+  export USE_CCACHE=1 CCACHE_EXEC="$(command -v ccache)"
+  ccache -M 50G >/dev/null
+fi
 
 step "7/7 Compilation"
 set +u
