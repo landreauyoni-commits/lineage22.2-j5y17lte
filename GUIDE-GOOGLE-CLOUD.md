@@ -45,8 +45,11 @@ refuse avec un message parlant de **quota**, recommence avec `n2-standard-8`
 4. **Configuration de la machine** : série **N2**, type **n2-standard-16**
    (ou **n2-standard-8** selon l'étape 2).
 5. **Disque de démarrage** → **Modifier** :
-   - Système d'exploitation : **Ubuntu**
-   - Version : **Ubuntu 24.04 LTS** (x86/64, *pas* la version « Minimal » ni « Arm64 »)
+   - Système d'exploitation : **Ubuntu**, version **Ubuntu 24.04 LTS**
+     (x86/64, *pas* « Minimal » ni « Arm64 »)
+   - Si la liste ne propose que **Debian** : prends **Debian GNU/Linux 12
+     (bookworm)**, version **x86/64** (*pas* « arm64 »). `build.sh` fonctionne
+     aussi sur Debian.
    - Type de disque : **Disque persistant avec équilibrage** (*Balanced persistent disk*)
    - Taille : **500** Go
    - **Sélectionner**
