@@ -26,29 +26,15 @@ installer sur ton PC : un serveur Google Cloud compile la ROM à ta place.
 
 L'essai n'est possible que si tu n'as jamais été client payant de Google Cloud.
 
-## Étape 2 — Vérifier combien de processeurs tu as le droit d'utiliser (2 min)
+## Étape 2 — Activer Compute Engine (2 min)
 
-Les comptes d'essai ont parfois un quota de processeurs réduit.
+Menu ☰ → **Compute Engine** → bouton **Activer** → attends 1 à 2 min que la
+page « Instances de VM » s'affiche.
 
-1. **Active d'abord Compute Engine** (sinon ses quotas n'apparaissent nulle
-   part) : menu ☰ → **Compute Engine** → bouton **Activer** → attends 1 à 2 min
-   que la page « Instances de VM » s'affiche.
-2. Ouvre **Cloud Shell** : l'icône **>_** en haut à droite de la console. Un
-   terminal gratuit s'ouvre en bas de la page (autorise-le si on te le demande).
-3. Copie-colle cette commande :
-
-```bash
-gcloud compute regions describe europe-west1 --flatten=quotas --format="table(quotas.metric,quotas.limit)" | grep -E "^(CPUS|N2_CPUS) "
-```
-
-Regarde le **plus petit** des deux nombres affichés (`CPUS` et `N2_CPUS`) :
-
-- **≥ 16** → tu prendras le serveur `n2-standard-16` (plus rapide).
-- **8 à 15** → tu prendras `n2-standard-8` (plus lent, tout aussi gratuit).
-
-Autre méthode, sans commande : crée directement la VM en `n2-standard-16`
-(étape 3). Si Google refuse avec un message de **quota**, recommence en
-`n2-standard-8`.
+Les comptes d'essai ont parfois un quota de processeurs réduit. Inutile de le
+vérifier à l'avance : à l'étape 3, essaie d'abord `n2-standard-16` ; si Google
+refuse avec un message parlant de **quota**, recommence avec `n2-standard-8`
+(plus lent, tout aussi gratuit).
 
 ## Étape 3 — Créer le serveur (5 min)
 
