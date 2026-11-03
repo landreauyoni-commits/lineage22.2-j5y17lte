@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  LineageOS 22.2 (Android 15) - Samsung Galaxy J5 2017 européen
+  SM-J530F / j5y17lte / Exynos 7870
+
+  Sources : communauté https://github.com/samsungexynos7870 (pile 22.2 utilisée
+  pour les builds A3 2017 publiés) + dépôts officiels LineageOS.
+
+  L'arbre j5y17lte n'existe qu'en lineage-20 : il est figé sur le commit
+  vérifié ci-dessous, puis build.sh applique les correctifs de patches/.
+  GCC 4.9 (noyau 3.18), FMRadio et devicesettings sont déjà dans le manifeste
+  officiel 22.2 : ne pas les rajouter ici (chemins en double = erreur).
+-->
+<manifest>
+  <remote name="exynos7870" fetch="https://github.com/samsungexynos7870" />
+  <remote name="los"        fetch="https://github.com/LineageOS" />
+
+  <!-- Appareil : lineage-20 figé (52defb3, 2026-10-04) + patches/ -->
+  <project path="device/samsung/j5y17lte" name="android_device_samsung_j5y17lte" remote="exynos7870"
+           revision="52defb3fbdbcd99aabc71e100fb469090798839b" upstream="lineage-20" />
+
+  <!-- Plateforme commune Exynos 7870 -->
+  <project path="device/samsung/universal7870-common" name="android_device_samsung_universal7870-common" remote="exynos7870" revision="lineage-22.2" />
+  <project path="kernel/samsung/exynos7870"           name="android_kernel_samsung_exynos7870"           remote="exynos7870" revision="lineage-22.2" />
+
+  <!-- Blobs propriétaires -->
+  <project path="vendor/samsung/universal7870-common" name="android_vendor_samsung_universal7870-common" remote="exynos7870" revision="lineage-22.2" />
+  <project path="vendor/samsung/j5y17lte"             name="android_vendor_samsung_j5y17lte"             remote="exynos7870" revision="lineage-20" />
+
+  <!-- HAL Samsung SLSI pour l'Exynos 7870 -->
+  <project path="hardware/samsung_slsi-linaro/config"   name="android_hardware_samsung_slsi-linaro_config"   remote="exynos7870" revision="lineage-22.2" />
+  <project path="hardware/samsung_slsi-linaro/exynos"   name="android_hardware_samsung_slsi-linaro_exynos"   remote="exynos7870" revision="lineage-22.2" />
+  <project path="hardware/samsung_slsi-linaro/exynos5"  name="android_hardware_samsung_slsi-linaro_exynos5"  remote="exynos7870" revision="lineage-22.2" />
+  <project path="hardware/samsung_slsi-linaro/graphics" name="android_hardware_samsung_slsi-linaro_graphics" remote="exynos7870" revision="lineage-22.2" />
+  <project path="hardware/samsung_slsi-linaro/openmax"  name="android_hardware_samsung_slsi-linaro_openmax"  remote="exynos7870" revision="lineage-22.2" />
+
+  <!-- Officiel LineageOS (hardware/samsung/nfc est déjà dans le manifeste par défaut) -->
+  <project path="hardware/samsung" name="android_hardware_samsung" remote="los" revision="lineage-22.2" />
+</manifest>

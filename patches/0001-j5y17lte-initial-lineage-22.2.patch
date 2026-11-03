@@ -1,0 +1,65 @@
+From 29f34532ede0a35432580ac1d24d149d95e1c8fd Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Tue, 3 Nov 2026 22:54:01 +0000
+Subject: [PATCH 1/7] j5y17lte: initial lineage-22.2
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ BoardConfig.mk       | 12 ++++++++++++
+ lineage.dependencies |  3 ++-
+ 2 files changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index 36ca1de..67c3ea0 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -42,6 +42,11 @@ TARGET_BOARD_TFA_MODEL := 9890
+ # Display
+ TARGET_SCREEN_DENSITY := 320
+ 
++# build fixes
++BUILD_BROKEN_CLANG_PROPERTY := true
++BUILD_BROKEN_CLANG_CFLAGS := true
++BUILD_BROKEN_CLANG_ASFLAGS := true
++
+ # Assert
+ TARGET_OTA_ASSERT_DEVICE := j5y17lte,j5y17ltexx,j5y17ltextc,j5y17lteub
+ 
+@@ -57,6 +62,7 @@ TARGET_KERNEL_CONFIG := exynos7870-j5y17lte_defconfig
+ 
+ # HIDL
+ DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/configs/manifest.xml
++BUILD_BROKEN_VINTF_PRODUCT_COPY_FILES := true
+ 
+ # Init
+ TARGET_INIT_VENDOR_LIB := //$(DEVICE_PATH):libinit_j5y17lte
+@@ -84,6 +90,12 @@ BOARD_CAMERA_QUICKSHOT_SUPPORT := true
+ BOARD_CAMERA_SAMSUNG_TN_FEATURE := true
+ BOARD_CAMERA_HAL3_FEATURE := true
+ 
++# A/B
++AB_OTA_UPDATER := false
++
++## USB
++$(call soong_config_set,samsungUsbGadgetVars,gadget_name,13600000.dwc3)
++
+ # RIL
+ SIM_COUNT := 2
+ 
+diff --git a/lineage.dependencies b/lineage.dependencies
+index e450f4a..91d8d95 100644
+--- a/lineage.dependencies
++++ b/lineage.dependencies
+@@ -1,6 +1,7 @@
+ [
+     {
+         "repository": "android_device_samsung_universal7870-common",
+-        "target_path": "device/samsung/universal7870-common"
++        "target_path": "device/samsung/universal7870-common",
++        "branch": "lineage-22.2"
+     }
+ ]
+-- 
+2.43.0
+

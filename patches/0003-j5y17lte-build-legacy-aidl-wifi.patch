@@ -1,0 +1,27 @@
+From 3a990520afd29a9023758566c81cca478ab65506 Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Tue, 3 Nov 2026 22:54:02 +0000
+Subject: [PATCH 3/7] j5y17lte: build legacy aidl wifi
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ device.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/device.mk b/device.mk
+index b8cf21b..23cbae6 100644
+--- a/device.mk
++++ b/device.mk
+@@ -122,7 +122,7 @@ PRODUCT_PACKAGES += \
+ 
+ # Wifi
+ PRODUCT_PACKAGES += \
+-    android.hardware.wifi@1.0-service \
++    android.hardware.wifi-service-legacy \
+     hostapd \
+     libwifi-hal \
+     libwpa_client \
+-- 
+2.43.0
+

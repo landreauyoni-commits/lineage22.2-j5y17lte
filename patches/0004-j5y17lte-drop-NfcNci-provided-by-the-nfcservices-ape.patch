@@ -1,0 +1,26 @@
+From 33414550ab9fe53d393c904267fe88dd621852c1 Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Tue, 3 Nov 2026 22:54:02 +0000
+Subject: [PATCH 4/7] j5y17lte: drop NfcNci, provided by the nfcservices apex
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ device.mk | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/device.mk b/device.mk
+index 23cbae6..c39d49a 100644
+--- a/device.mk
++++ b/device.mk
+@@ -101,7 +101,6 @@ PRODUCT_COPY_FILES += \
+ PRODUCT_PACKAGES += \
+     libnfc-nci \
+     libnfc_nci_jni \
+-    NfcNci \
+     Tag \
+     com.android.nfc_extras \
+     android.hardware.nfc@1.2.vendor \
+-- 
+2.43.0
+

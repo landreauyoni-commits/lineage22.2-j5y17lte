@@ -1,0 +1,75 @@
+From 110a5e675692e958b7ac25e0c7e910db79338e5a Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Tue, 3 Nov 2026 22:54:24 +0000
+Subject: [PATCH 5/7] j5y17lte: manifest: bump FCM to 5, drop clearkey/default
+ DRM and SehNfc, declare soundtrigger
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ configs/manifest.xml | 28 ++++++++++------------------
+ 1 file changed, 10 insertions(+), 18 deletions(-)
+
+diff --git a/configs/manifest.xml b/configs/manifest.xml
+index 6ee0577..61e2872 100644
+--- a/configs/manifest.xml
++++ b/configs/manifest.xml
+@@ -1,4 +1,4 @@
+-<manifest version="1.0" type="device" target-level="3">
++<manifest version="1.0" type="device" target-level="5">
+     <hal format="hidl">
+         <name>android.hardware.audio</name>
+         <transport>hwbinder</transport>
+@@ -17,6 +17,15 @@
+             <instance>default</instance>
+         </interface>
+     </hal>
++    <hal format="hidl">
++        <name>android.hardware.soundtrigger</name>
++        <transport>hwbinder</transport>
++        <version>2.2</version>
++        <interface>
++            <name>ISoundTriggerHw</name>
++            <instance>default</instance>
++        </interface>
++    </hal>
+     <hal format="hidl">
+         <name>android.hardware.bluetooth</name>
+         <transport>hwbinder</transport>
+@@ -61,16 +70,9 @@
+             <name>ICryptoFactory</name>
+             <instance>default</instance>
+         </interface>
+-        <interface>
+-            <name>IDrmFactory</name>
+-            <instance>default</instance>
+-        </interface>
+         <fqname>@1.0::ICryptoFactory/default</fqname>
+-        <fqname>@1.0::IDrmFactory/default</fqname>
+         <fqname>@1.2::ICryptoFactory/widevine</fqname>
+         <fqname>@1.2::IDrmFactory/widevine</fqname>
+-        <fqname>@1.4::ICryptoFactory/clearkey</fqname>
+-        <fqname>@1.4::IDrmFactory/clearkey</fqname>
+     </hal>
+     <hal format="hidl">
+         <name>vendor.samsung.hardware.security.widevine.keyprovisioning</name>
+@@ -161,16 +163,6 @@
+             <instance>default</instance>
+         </interface>
+     </hal>
+-    <hal format="hidl">
+-        <name>vendor.samsung.hardware.nfc</name>
+-        <transport>hwbinder</transport>
+-        <version>2.0</version>
+-        <interface>
+-            <name>ISehNfc</name>
+-            <instance>default</instance>
+-        </interface>
+-        <fqname>@2.0::ISehNfc/default</fqname>
+-    </hal>
+     <hal format="hidl">
+         <name>android.hardware.radio</name>
+         <transport>hwbinder</transport>
+-- 
+2.43.0
+

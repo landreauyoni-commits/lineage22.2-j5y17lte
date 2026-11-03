@@ -1,0 +1,47 @@
+From affefc55e47bfd83ed3ed80115606f67ff5dbbfa Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Tue, 3 Nov 2026 22:54:01 +0000
+Subject: [PATCH 2/7] j5y17lte: move to soong init config
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ init/Android.bp => Android.bp | 4 ++--
+ BoardConfig.mk                | 3 +--
+ 2 files changed, 3 insertions(+), 4 deletions(-)
+ rename init/Android.bp => Android.bp (91%)
+
+diff --git a/init/Android.bp b/Android.bp
+similarity index 91%
+rename from init/Android.bp
+rename to Android.bp
+index 157078b..7ee1dce 100644
+--- a/init/Android.bp
++++ b/Android.bp
+@@ -17,7 +17,7 @@
+ cc_library_static {
+     name: "libinit_j5y17lte",
+     recovery_available: true,
+-    srcs: ["init_j5y17lte.cpp"],
++    srcs: ["init/init_j5y17lte.cpp"],
+     include_dirs: ["system/core/init"],
+-    shared_libs: ["libbase"]
++    shared_libs: ["libbase"],
+ }
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index 67c3ea0..8a8a39f 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -65,8 +65,7 @@ DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/configs/manifest.xml
+ BUILD_BROKEN_VINTF_PRODUCT_COPY_FILES := true
+ 
+ # Init
+-TARGET_INIT_VENDOR_LIB := //$(DEVICE_PATH):libinit_j5y17lte
+-TARGET_RECOVERY_DEVICE_MODULES := libinit_j5y17lte
++$(call soong_config_set,libinit,vendor_init_lib,//$(DEVICE_PATH):libinit_j5y17lte)
+ 
+ # Releasetools
+ TARGET_RELEASETOOLS_EXTENSIONS := $(DEVICE_PATH)/releasetools
+-- 
+2.43.0
+

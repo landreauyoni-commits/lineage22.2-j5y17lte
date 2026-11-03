@@ -1,0 +1,65 @@
+From 4862e4e6aaca0d6983e0366f9d5aab4cb8b7247b Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Tue, 3 Nov 2026 22:54:24 +0000
+Subject: [PATCH 7/7] j5y17lte: init: set ro.multisim.simslotcount, match
+ J530GM before J530G, fix log
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ init/init_j5y17lte.cpp | 19 ++++++++++---------
+ 1 file changed, 10 insertions(+), 9 deletions(-)
+
+diff --git a/init/init_j5y17lte.cpp b/init/init_j5y17lte.cpp
+index 6aef2ef..76e6f5d 100644
+--- a/init/init_j5y17lte.cpp
++++ b/init/init_j5y17lte.cpp
+@@ -73,7 +73,7 @@ void property_override_quad(const std::string& boot_prop, const std::string& pro
+ 
+ void init_dsds() {
+     SetProperty("ro.vendor.multisim.set_audio_params", "true");
+-    SetProperty("ro.vendor.multisim.simslotcount", "2");
++    property_override_dual("ro.multisim.simslotcount", "ro.vendor.multisim.simslotcount", "2");
+     SetProperty("persist.radio.multisim.config", "dsds");
+ }
+ 
+@@ -91,13 +91,6 @@ void vendor_load_properties()
+ 
+         init_dsds();
+ 
+-    } else if (bootloader.find("J530G") == 0) {
+-    /* SM-J530G */
+-        property_override_quad("ro.product.model", "ro.product.odm.model", "ro.product.system.model", "ro.product.vendor.model", "SM-J530G");
+-        property_override_quad("ro.product.name", "ro.product.odm.name", "ro.product.system.name", "ro.product.vendor.name", "j5y17lteub");
+-
+-        init_dsds();
+-
+     } else if (bootloader.find("J530GM") == 0) {
+     /* SM-J530GM */
+         property_override_quad("ro.product.model", "ro.product.odm.model", "ro.product.system.model", "ro.product.vendor.model", "SM-J530GM");
+@@ -105,6 +98,13 @@ void vendor_load_properties()
+ 
+         init_dsds();
+ 
++    } else if (bootloader.find("J530G") == 0) {
++    /* SM-J530G */
++        property_override_quad("ro.product.model", "ro.product.odm.model", "ro.product.system.model", "ro.product.vendor.model", "SM-J530G");
++        property_override_quad("ro.product.name", "ro.product.odm.name", "ro.product.system.name", "ro.product.vendor.name", "j5y17lteub");
++
++        init_dsds();
++
+     } else if (bootloader.find("J530FM") == 0) {
+     /* SM-J530FM */
+         property_override_quad("ro.product.model", "ro.product.odm.model", "ro.product.system.model", "ro.product.vendor.model", "SM-J530FM");
+@@ -119,6 +119,7 @@ void vendor_load_properties()
+     property_override_quad("ro.product.device", "ro.product.odm.device", "ro.product.system.device", "ro.product.vendor.device", "j5y17lte");
+ 
+     std::string device = GetProperty("ro.product.device", "");
+-    LOG(ERROR) << "Found bootloader id %s setting build properties for %s device\n" << bootloader.c_str() << device.c_str();
++    LOG(ERROR) << "Found bootloader id " << bootloader << " setting build properties for "
++               << device << " device";
+ }
+ 
+-- 
+2.43.0
+
