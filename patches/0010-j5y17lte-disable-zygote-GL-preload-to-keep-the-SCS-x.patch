@@ -1,0 +1,39 @@
+From 7dbc49497cb6e2007f5c7c24dc9dc86274b9f84e Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Wed, 4 Nov 2026 14:21:58 +0000
+Subject: [PATCH] j5y17lte: disable zygote GL preload to keep the SCS x18
+ register intact
+
+The Mali-T830 blob clears x18 while zygote preloads OpenGL; forked
+processes inherit it and the ShadowCallStack prologue of
+libbluetooth_jni.so / libnfc_nci_jni.so faults at address 0, so
+com.android.bluetooth and com.android.nfc crash-loop on boot.
+Verified on SM-J530F: Bluetooth and NFC work with this property.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ device.mk | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/device.mk b/device.mk
+index e2849fe..f5636ed 100644
+--- a/device.mk
++++ b/device.mk
+@@ -141,6 +141,13 @@ PRODUCT_COPY_FILES += \
+     $(DEVICE_PATH)/configs/wifi/p2p_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/p2p_supplicant_overlay.conf \
+     $(DEVICE_PATH)/configs/wifi/wpa_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/wpa_supplicant_overlay.conf
+ 
++# Zygote: the proprietary Mali-T830 libGLES_mali.so zeroes x18 when zygote
++# preloads OpenGL; x18 (ARM64 ShadowCallStack) is inherited across fork() and
++# SCS-instrumented libraries (libbluetooth_jni, libnfc_nci_jni) crash at their
++# first instruction. Bluetooth and NFC never start without this.
++PRODUCT_SYSTEM_PROPERTIES += \
++    ro.zygote.disable_gl_preload=true
++
+ # Properties
+ -include $(DEVICE_PATH)/vendor_prop.mk
+ 
+-- 
+2.43.0
+
