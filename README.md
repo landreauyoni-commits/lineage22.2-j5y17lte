@@ -5,7 +5,7 @@
 | Modèle | **SM-J530F** (aussi J530FM, J530G, J530GM) |
 | Nom de code | `j5y17lte` |
 | SoC | Exynos 7870 · noyau Linux 3.18 · 2 Go RAM · Wi-Fi/BT Broadcom |
-| Statut | **Non officiel. Compile et démarre sur un SM-J530F (4 nov. 2026)** ; quasiment tout le matériel vérifié (voir détails) ; GPS à confirmer, flash avant indisponible |
+| Statut | **Non officiel. Compile et démarre sur un SM-J530F (4 nov. 2026)** ; tout le matériel testé fonctionne, sauf le flash avant |
 
 ## D'où vient ce kit
 
@@ -61,9 +61,8 @@ ROM déjà installée), avec bootloader/modem mis à jour en `J530FXXS9CUE5`
 Vérifié ensuite : **appels** (écouteur et haut-parleur), **SMS**, **données
 mobiles**, **capteur de proximité**, **appareils photo** avant et arrière (sauf
 flash avant), **son**, **empreinte digitale**, **rotation de l'écran**,
-**économiseur de batterie** (il ne s'active pas pendant la charge : normal).
-
-Ce qui **n'a pas encore** été vérifié : GPS.
+**économiseur de batterie** (il ne s'active pas pendant la charge : normal),
+**GPS**.
 
 ## Contenu
 
