@@ -98,24 +98,43 @@ tout va bien. C'est fini quand tu vois `==> Terminé` suivi du nom du `.zip`.
 
 ## Étape 5 — Récupérer le fichier `.zip` (10 min)
 
-1. Dans le terminal SSH, copie le zip dans ton dossier personnel et affiche
-   son chemin complet :
+Le menu « Télécharger le fichier » de la fenêtre SSH échoue souvent avec un
+fichier de cette taille (~900 Mo). On passe par Cloud Storage.
+
+1. Dans le terminal SSH, note l'empreinte du fichier :
 
 ```bash
-cp ~/android/lineage/out/target/product/j5y17lte/lineage-22.2-*-UNOFFICIAL-j5y17lte.zip ~/ && ls ~/lineage-22.2-*.zip
+sha256sum ~/android/lineage/out/target/product/j5y17lte/lineage-22.2-*-UNOFFICIAL-j5y17lte.zip
 ```
 
-2. En haut à droite de la fenêtre SSH : **⚙ / Télécharger le fichier**
-   (*Download file*), colle le chemin affiché (par ex.
-   `/home/ton_nom/lineage-22.2-20261104-UNOFFICIAL-j5y17lte.zip`) →
-   **Télécharger**. Le fichier fait ~1 Go.
-3. Vérifie que le fichier est bien sur ton PC **avant** l'étape 6.
+2. Connecte le serveur à ton compte (ouvre le lien affiché, **Autoriser**,
+   recopie le code dans le terminal) :
+
+```bash
+gcloud auth login --no-launch-browser
+```
+
+3. Crée un espace de stockage et copie le zip dedans :
+
+```bash
+B=gs://j5-rom-$(date +%s) && gcloud storage buckets create $B --location=europe-west1 && gcloud storage cp ~/android/lineage/out/target/product/j5y17lte/lineage-22.2-*-UNOFFICIAL-j5y17lte.zip $B/ && echo "OK : $B"
+```
+
+4. Console : menu ☰ → **Cloud Storage** → **Buckets** → `j5-rom-…` → clique
+   sur le `.zip` → **Télécharger**.
+5. Sur ton PC (Windows, dans `cmd`, depuis le dossier Téléchargements),
+   vérifie que l'empreinte est identique à celle de l'étape 1 :
+
+```
+certutil -hashfile lineage-22.2-AAAAMMJJ-UNOFFICIAL-j5y17lte.zip SHA256
+```
 
 ## Étape 6 — Supprimer le serveur (2 min) ⚠️ ne pas oublier
 
 1. **Compute Engine** → **Instances de VM** → coche `lineage-build` →
    **Supprimer** (le disque est supprimé avec).
 2. Va dans **Compute Engine** → **Disques** : la liste doit être vide.
+3. **Cloud Storage** → **Buckets** → coche `j5-rom-…` → **Supprimer**.
 
 Sans ça, le serveur continue de consommer ton crédit (~10 à 20 $ par jour).
 

@@ -5,7 +5,7 @@
 | Modèle | **SM-J530F** (aussi J530FM, J530G, J530GM) |
 | Nom de code | `j5y17lte` |
 | SoC | Exynos 7870 · noyau Linux 3.18 · 2 Go RAM · Wi-Fi/BT Broadcom |
-| Statut | **Non officiel, jamais compilé ni testé sur J5** |
+| Statut | **Non officiel. Compile entièrement (4 nov. 2026) ; pas encore testé sur un téléphone** |
 
 ## D'où vient ce kit
 
@@ -44,8 +44,11 @@ européen), sans erreur. Les options eBPF requises par Android 15 sont
 activées : `BPF_SYSCALL`, `CGROUP_BPF`, `BPF_JIT`, `NETFILTER_XT_MATCH_BPF`,
 `NET_CLS_BPF`, `NET_ACT_BPF`.
 
-Ce qui **n'a pas** été vérifié : la compilation de la ROM complète et le
-démarrage sur un vrai téléphone.
+**ROM complète compilée avec succès** (4 nov. 2026, Google Cloud, Debian 12,
+`LOW_DISK=1`) : `lineage-22.2-20261104-UNOFFICIAL-j5y17lte.zip`, 894 Mo.
+
+Ce qui **n'a pas** été vérifié : le démarrage et le fonctionnement sur un
+vrai téléphone.
 
 ## Contenu
 
