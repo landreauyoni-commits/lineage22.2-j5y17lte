@@ -54,11 +54,16 @@ fi
 
 step "4/7 Portage de l'arbre j5y17lte vers 22.2 (patches/)"
 DEV="$SRC/device/samsung/j5y17lte"
-if git -C "$DEV" log --format=%s | grep -q "^j5y17lte: initial lineage-22.2$"; then
-  echo "Patches déjà appliqués."
-else
-  git -C "$DEV" am --3way "$KIT"/patches/*.patch
-fi
+# Applique chaque patch qui ne l'est pas encore (comparaison sur le titre du commit).
+for p in "$KIT"/patches/*.patch; do
+  subj="$(sed -n 's/^Subject: \[PATCH[^]]*\] //p' "$p" | head -1 | cut -c1-45)"
+  if git -C "$DEV" log --format=%s | grep -qF -- "$subj"; then
+    echo "  déjà appliqué : $(basename "$p")"
+  else
+    echo "  application   : $(basename "$p")"
+    git -C "$DEV" am --3way "$p"
+  fi
+done
 
 if [ "${REGEN_BLOBS:-0}" = 1 ]; then
   step "5/7 Régénération des blobs depuis les dumps J530F publics"

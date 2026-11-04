@@ -1,0 +1,65 @@
+From b10762e9861e73963544040854754bc8df39282b Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Wed, 4 Nov 2026 08:05:10 +0000
+Subject: [PATCH] j5y17lte: bluetooth: build Broadcom libbt-vendor on
+ lineage-22.2
+
+hardware/broadcom/libbt is a soong namespace configured through the
+brcm_libbt soong config variables since its Android.bp conversion, so
+BOARD_CUSTOM_BT_CONFIG no longer has any effect and libbt-vendor was
+missing from the build. Export the namespace and point custom_bt_config
+at the device libbt_vndcfg.txt through a filegroup.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ Android.bp     | 7 +++++++
+ BoardConfig.mk | 1 +
+ device.mk      | 4 ++++
+ 3 files changed, 12 insertions(+)
+
+diff --git a/Android.bp b/Android.bp
+index 7ee1dce..9d119da 100644
+--- a/Android.bp
++++ b/Android.bp
+@@ -21,3 +21,10 @@ cc_library_static {
+     include_dirs: ["system/core/init"],
+     shared_libs: ["libbase"],
+ }
++
++// Broadcom libbt-vendor configuration (UART port, firmware path, baud rate),
++// selected in BoardConfig.mk through the brcm_libbt soong config namespace.
++filegroup {
++    name: "vnd_j5y17lte.txt",
++    srcs: ["bluetooth/libbt_vndcfg.txt"],
++}
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index 9dda693..4f457f1 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -56,6 +56,7 @@ BOARD_CUSTOM_BT_CONFIG := $(DEVICE_PATH)/bluetooth/libbt_vndcfg.txt
+ BOARD_HAVE_BLUETOOTH := true
+ BOARD_HAVE_BLUETOOTH_BCM := true
+ BOARD_HAVE_SAMSUNG_BLUETOOTH := true
++$(call soong_config_set,brcm_libbt,custom_bt_config,//$(DEVICE_PATH):vnd_j5y17lte.txt)
+ 
+ # Kernel
+ TARGET_KERNEL_CONFIG := exynos7870-j5y17lte_defconfig
+diff --git a/device.mk b/device.mk
+index c39d49a..e2849fe 100644
+--- a/device.mk
++++ b/device.mk
+@@ -87,6 +87,10 @@ PRODUCT_PACKAGES += \
+ PRODUCT_COPY_FILES += \
+     $(DEVICE_PATH)/bluetooth/bt_vendor.conf:vendor/etc/bluetooth/bt_vendor.conf
+ 
++# libbt-vendor lives in the hardware/broadcom/libbt soong namespace
++PRODUCT_SOONG_NAMESPACES += \
++    hardware/broadcom/libbt
++
+ # Display Device Config
+ PRODUCT_COPY_FILES += \
+     $(DEVICE_PATH)/configs/display/576nits_config/display_id_0.xml:$(TARGET_COPY_OUT_VENDOR)/etc/displayconfig/display_id_0.xml
+-- 
+2.43.0
+

@@ -28,6 +28,8 @@
   <project path="vendor/samsung/j5y17lte"             name="android_vendor_samsung_j5y17lte"             remote="exynos7870" revision="lineage-20" />
 
   <!-- HAL Samsung SLSI pour l'Exynos 7870 -->
+  <!-- Spécifique 7870 : caméra (libexynoscamera/3, camera.vendor.exynos7870), MobiCore -->
+  <project path="hardware/samsung_slsi-linaro/exynos7870" name="android_hardware_samsung_slsi-linaro_exynos7870" remote="exynos7870" revision="lineage-22.2" />
   <project path="hardware/samsung_slsi-linaro/config"   name="android_hardware_samsung_slsi-linaro_config"   remote="exynos7870" revision="lineage-22.2" />
   <project path="hardware/samsung_slsi-linaro/exynos"   name="android_hardware_samsung_slsi-linaro_exynos"   remote="exynos7870" revision="lineage-22.2" />
   <project path="hardware/samsung_slsi-linaro/exynos5"  name="android_hardware_samsung_slsi-linaro_exynos5"  remote="exynos7870" revision="lineage-22.2" />

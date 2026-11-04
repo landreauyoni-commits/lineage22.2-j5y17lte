@@ -15,8 +15,8 @@ avec eBPF rétroporté, HAL, blobs). Elle publie des builds 22.2 pour l'**A3 201
 mais l'arbre du **J5 2017** n'existe qu'en `lineage-20`.
 
 Ce kit fige cet arbre `lineage-20` (commit `52defb3`, 4 oct. 2026, déjà
-modernisé pour la plateforme commune 22.2) et y applique 7 patchs qui
-reproduisent les changements faits sur l'A3 pour passer en 22.2 :
+modernisé pour la plateforme commune 22.2) et y applique 8 patchs (les 7
+premiers reproduisent les changements faits sur l'A3 pour passer en 22.2) :
 
 | Patch | Changement |
 |---|---|
@@ -27,8 +27,9 @@ reproduisent les changements faits sur l'A3 pour passer en 22.2 :
 | 0005 | Manifeste VINTF : FCM 3 → 5, retrait DRM clearkey/default et SehNfc, ajout soundtrigger 2.2 |
 | 0006 | SELinux : étiquettes du shim `libbauthserver` (empreinte) et du HAL NFC |
 | 0007 | init : `ro.multisim.simslotcount`, détection J530GM corrigée (avant J530G), log corrigé |
+| 0008 | Bluetooth Broadcom : `libbt-vendor` configuré via Soong (`brcm_libbt`), obligatoire depuis LineageOS 22.2 |
 
-Ce qui a été **vérifié** : les 11 dépôts et branches existent, les patchs
+Ce qui a été **vérifié** : les 12 dépôts et branches existent, les patchs
 s'appliquent sans conflit, la config noyau `exynos7870-j5y17lte_defconfig`
 est présente dans la branche noyau 22.2, et toutes les options attendues par la
 plateforme commune sont définies par le J5 (seules différences avec l'A3 :
@@ -49,8 +50,8 @@ démarrage sur un vrai téléphone.
 
 | Fichier | Rôle |
 |---|---|
-| `local_manifests/j5y17lte.xml` | Les 11 dépôts à ajouter aux sources LineageOS 22.2 |
-| `patches/0001…0007` | Le portage de l'arbre j5y17lte vers 22.2 |
+| `local_manifests/j5y17lte.xml` | Les 12 dépôts à ajouter aux sources LineageOS 22.2 |
+| `patches/0001…0008` | Le portage de l'arbre j5y17lte vers 22.2 |
 | `build.sh` | Tout de A à Z : paquets → `repo sync` → patchs → `mka bacon` |
 
 ## Machine nécessaire
