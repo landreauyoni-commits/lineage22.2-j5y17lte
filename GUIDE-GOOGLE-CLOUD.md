@@ -125,7 +125,7 @@ Sans ça, le serveur continue de consommer ton crédit (~10 à 20 $ par jour).
 
 | Situation | Que faire |
 |---|---|
-| La compilation s'arrête sur une erreur | `tail -n 80 ~/build.log` et envoie-moi ces lignes. Après correction : `SKIP_SYNC=1 LOW_DISK=1 ./build.sh 2>&1 \| tee ~/build.log` |
+| La compilation s'arrête sur une erreur (`failed to build some targets`) | `head -c 8000 ~/android/lineage/out/error.log` et envoie-moi ce qui s'affiche. Après correction : `SKIP_SYNC=1 LOW_DISK=1 ./build.sh 2>&1 \| tee ~/build.log` |
 | Blobs propriétaires manquants | `SKIP_SYNC=1 LOW_DISK=1 REGEN_BLOBS=1 ./build.sh 2>&1 \| tee ~/build.log` |
 | Tu dois t'absenter plusieurs jours en plein dépannage | **Arrêter** la VM (pas supprimer) : le processeur n'est plus facturé, seul le disque l'est (~2 $/jour) |
 | Création refusée « quota dépassé » | Prends `n2-standard-8` |
