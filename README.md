@@ -5,7 +5,7 @@
 | Modèle | **SM-J530F** (aussi J530FM, J530G, J530GM) |
 | Nom de code | `j5y17lte` |
 | SoC | Exynos 7870 · noyau Linux 3.18 · 2 Go RAM · Wi-Fi/BT Broadcom |
-| Statut | **Non officiel. Compile et démarre sur un SM-J530F (4 nov. 2026)** ; Wi-Fi, Bluetooth, NFC, carte SIM vérifiés, reste du matériel en cours de test |
+| Statut | **Non officiel. Compile et démarre sur un SM-J530F (4 nov. 2026)** ; Wi-Fi, Bluetooth, NFC, SIM, appels, 4G, caméras vérifiés (voir détails) |
 
 ## D'où vient ce kit
 
@@ -58,8 +58,11 @@ la carte SIM (après les patchs 0010 à 0012, ou `tools/j5-hotfix.sh` sur une
 ROM déjà installée), avec bootloader/modem mis à jour en `J530FXXS9CUE5`
 (BL + CP du firmware Android 9 flashés seuls avec Odin).
 
-Ce qui **n'a pas encore** été vérifié : appels, SMS, données mobiles, caméra,
-audio, GPS, empreinte, capteurs.
+Vérifié ensuite : **appels** (écouteur et haut-parleur), **données mobiles**,
+**capteur de proximité**, **appareils photo** avant et arrière (sauf flash avant).
+
+Ce qui **n'a pas encore** été vérifié : SMS, son (musique, micro), GPS,
+empreinte, rotation de l'écran.
 
 ## Contenu
 
@@ -266,6 +269,11 @@ pas un plantage : c'est le redémarrage forcé Vol- + Power.
   apparaître.
 - Android 15 sur 2 Go de RAM : fluide pour l'usage de base, limité en multitâche.
 - Mises à jour OTA : non (build non officiel), il faut reflasher.
+- **Flash avant** (selfie) indisponible : le pilote caméra de la plateforme
+  commune, écrit pour l'A3 2017, déclare la caméra avant (S5K3M3) sans flash
+  (`flashAvailable = FALSE` dans `ExynosCamera3SensorInfoBase.cpp`), alors que
+  le noyau du J5 gère la LED (`CONFIG_LEDS_SUPPORT_FRONT_FLASH`). Contournement :
+  « flash d'écran » d'Open Camera.
 - **Modem** : avec le modem Android 7 d'origine (`J530FXXU1AQI3`), le modem ne
   finit jamais de démarrer (`ss310ap_boot_off: T-I-M-E-O-U-T`). Flashez avec Odin
   **uniquement BL et CP** du dernier firmware Samsung Android 9 du SM-J530F
