@@ -29,9 +29,11 @@
 
   <!-- HAL Samsung SLSI pour l'Exynos 7870 -->
   <!-- Spécifique 7870 : caméra (libexynoscamera/3, camera.vendor.exynos7870), MobiCore -->
-  <project path="hardware/samsung_slsi-linaro/exynos7870" name="android_hardware_samsung_slsi-linaro_exynos7870" remote="exynos7870" revision="lineage-22.2" />
+  <project path="hardware/samsung_slsi-linaro/exynos7870" name="android_hardware_samsung_slsi-linaro_exynos7870" remote="exynos7870"
+           revision="0eb5ac6813e929ae8746af228a50d5bacba08083" upstream="lineage-22.2" /><!-- figé : base de patches/exynos7870 -->
   <project path="hardware/samsung_slsi-linaro/config"   name="android_hardware_samsung_slsi-linaro_config"   remote="exynos7870" revision="lineage-22.2" />
-  <project path="hardware/samsung_slsi-linaro/exynos"   name="android_hardware_samsung_slsi-linaro_exynos"   remote="exynos7870" revision="lineage-22.2" />
+  <project path="hardware/samsung_slsi-linaro/exynos"   name="android_hardware_samsung_slsi-linaro_exynos"   remote="exynos7870"
+           revision="fc1378590212f81189931ada5cf719688002c00f" upstream="lineage-22.2" /><!-- figé : base de patches/slsi-exynos -->
   <project path="hardware/samsung_slsi-linaro/exynos5"  name="android_hardware_samsung_slsi-linaro_exynos5"  remote="exynos7870" revision="lineage-22.2" />
   <project path="hardware/samsung_slsi-linaro/graphics" name="android_hardware_samsung_slsi-linaro_graphics" remote="exynos7870" revision="lineage-22.2" />
   <project path="hardware/samsung_slsi-linaro/openmax"  name="android_hardware_samsung_slsi-linaro_openmax"  remote="exynos7870" revision="lineage-22.2" />

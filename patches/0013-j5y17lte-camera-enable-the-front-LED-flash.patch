@@ -1,0 +1,32 @@
+From 64fa3240b90820a95cd8d45c52c9ccfca02b1040 Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Wed, 4 Nov 2026 15:29:54 +0000
+Subject: [PATCH] j5y17lte: camera: enable the front LED flash
+
+Turn on BOARD_FRONT_CAMERA_HAS_FLASH, used by the camera HAL patches in
+patches/exynos7870 and patches/slsi-exynos to advertise the front flash
+and fire it through CAM2_FLASH_MODE_LCD.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ BoardConfig.mk | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index 76709e0..02284ea 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -90,6 +90,9 @@ BOARD_CAMERA_QUICKSHOT_SUPPORT := true
+ BOARD_CAMERA_SAMSUNG_TN_FEATURE := true
+ BOARD_CAMERA_HAL3_FEATURE := true
+ 
++# Front LED flash (S2MU005 channel 2): advertised and fired by the camera HAL
++BOARD_FRONT_CAMERA_HAS_FLASH := true
++
+ # A/B
+ AB_OTA_UPDATER := false
+ 
+-- 
+2.43.0
+

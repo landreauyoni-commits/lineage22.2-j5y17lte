@@ -1,0 +1,103 @@
+From 0b5027aca7e5f84e735c57436d6a3f07e050dcac Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Wed, 4 Nov 2026 15:29:53 +0000
+Subject: [PATCH] libcamera: common_v2: fire the front LED flash
+ (CAM2_FLASH_MODE_LCD)
+
+On exynos7870 boards with a front LED (j5y17lte, S2MU005 channel 2) the
+kernel selects the front channel when the front sensor powers on, but
+only fires it for AA_FLASHMODE_START/ON when ctl.flash.flashMode is
+CAM2_FLASH_MODE_LCD (fimc_is_vender_set_torch). The HAL3 flash activity
+always sent CAM2_FLASH_MODE_NONE. Let the activity know whether it
+drives the front camera and, when built with FRONT_CAMERA_HAS_FLASH,
+send CAM2_FLASH_MODE_LCD for the pre and main flash, as the exynos7885
+HAL does for its front LCD flash.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ libcamera/34xx/ExynosCameraActivityControl.cpp    |  3 ++-
+ .../Activities/ExynosCameraActivityFlash.cpp      | 15 +++++++++++++++
+ .../Activities/ExynosCameraActivityFlash.h        |  2 ++
+ 3 files changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/libcamera/34xx/ExynosCameraActivityControl.cpp b/libcamera/34xx/ExynosCameraActivityControl.cpp
+index ff5329b..85f068c 100644
+--- a/libcamera/34xx/ExynosCameraActivityControl.cpp
++++ b/libcamera/34xx/ExynosCameraActivityControl.cpp
+@@ -23,7 +23,7 @@
+ 
+ namespace android {
+ 
+-ExynosCameraActivityControl::ExynosCameraActivityControl(__unused int cameraId)
++ExynosCameraActivityControl::ExynosCameraActivityControl(int cameraId)
+ {
+     flagAutoFocusRunning = false;
+     touchAFMode = false;
+@@ -31,6 +31,7 @@ ExynosCameraActivityControl::ExynosCameraActivityControl(__unused int cameraId)
+ 
+     m_autofocusMgr = new ExynosCameraActivityAutofocus();
+     m_flashMgr = new ExynosCameraActivityFlash();
++    m_flashMgr->setFrontFlash(cameraId == 1 /* CAMERA_ID_FRONT */);
+     m_specialCaptureMgr = new ExynosCameraActivitySpecialCapture();
+     m_uctlMgr = new ExynosCameraActivityUCTL();
+     m_focusMode = FOCUS_MODE_AUTO;
+diff --git a/libcamera/common_v2/Activities/ExynosCameraActivityFlash.cpp b/libcamera/common_v2/Activities/ExynosCameraActivityFlash.cpp
+index b480e93..f18356b 100644
+--- a/libcamera/common_v2/Activities/ExynosCameraActivityFlash.cpp
++++ b/libcamera/common_v2/Activities/ExynosCameraActivityFlash.cpp
+@@ -33,6 +33,7 @@ ExynosCameraActivityFlash::ExynosCameraActivityFlash()
+     t_reqNum = 0x1F;
+     t_reqStatus = 0;
+ 
++    m_isFrontFlash = false;
+     m_isNeedFlash = false;
+     m_isNeedCaptureFlash = true;
+     m_isNeedFlashOffDelay = false;
+@@ -133,6 +134,11 @@ int ExynosCameraActivityFlash::t_funcISPAfter(void *args)
+     return 1;
+ }
+ 
++void ExynosCameraActivityFlash::setFrontFlash(bool isFrontFlash)
++{
++    m_isFrontFlash = isFrontFlash;
++}
++
+ int ExynosCameraActivityFlash::t_func3ABeforeHAL3(void *args)
+ {
+     ExynosCameraBuffer *buf = (ExynosCameraBuffer *)args;
+@@ -569,6 +575,15 @@ int ExynosCameraActivityFlash::t_func3ABeforeHAL3(void *args)
+     ALOGV("INFO(%s[%d]):aeflashMode=%d", __FUNCTION__, __LINE__, (int)shot_ext->shot.ctl.aa.vendor_aeflashMode);
+ 
+ done:
++#ifdef FRONT_CAMERA_HAS_FLASH
++    /* The front LED (S2MU005 channel 2 on j5y17lte) is only fired by the
++     * kernel for pre/main flash when the flash mode is CAM2_FLASH_MODE_LCD
++     * (fimc_is_vender_set_torch); torch (ON_ALWAYS) works without it. */
++    if (m_isFrontFlash
++        && (shot_ext->shot.ctl.aa.vendor_aeflashMode == AA_FLASHMODE_START
++            || shot_ext->shot.ctl.aa.vendor_aeflashMode == AA_FLASHMODE_ON))
++        shot_ext->shot.ctl.flash.flashMode = CAM2_FLASH_MODE_LCD;
++#endif
+     return 1;
+ }
+ 
+diff --git a/libcamera/common_v2/Activities/ExynosCameraActivityFlash.h b/libcamera/common_v2/Activities/ExynosCameraActivityFlash.h
+index 6c0cfbd..1fe26c6 100644
+--- a/libcamera/common_v2/Activities/ExynosCameraActivityFlash.h
++++ b/libcamera/common_v2/Activities/ExynosCameraActivityFlash.h
+@@ -191,9 +191,11 @@ public:
+     void notifyAfResultHAL3(void);
+     void notifyAeResult(void);
+     void setMainFlashFiring(bool isMainFlashFiring);
++    void setFrontFlash(bool isFrontFlash);
+     void setManualExposureTime(uint64_t exposureTime);
+ 
+ private:
++    bool m_isFrontFlash;
+     bool m_isNeedFlash;
+     bool m_isNeedCaptureFlash;
+     /* TODO: If need another delay, add variables */
+-- 
+2.43.0
+

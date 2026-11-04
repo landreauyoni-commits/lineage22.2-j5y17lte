@@ -54,16 +54,25 @@ fi
 
 step "4/7 Portage vers 22.2 (patches/ + calibration audio TFA9890)"
 DEV="$SRC/device/samsung/j5y17lte"
-# Applique chaque patch qui ne l'est pas encore (comparaison sur le titre du commit).
-for p in "$KIT"/patches/*.patch; do
-  subj="$(sed -n 's/^Subject: \[PATCH[^]]*\] //p' "$p" | head -1 | cut -c1-45)"
-  if git -C "$DEV" log --format=%s | grep -qF -- "$subj"; then
-    echo "  déjà appliqué : $(basename "$p")"
-  else
-    echo "  application   : $(basename "$p")"
-    git -C "$DEV" am --3way "$p"
-  fi
-done
+# Applique chaque patch d'un dossier qui ne l'est pas encore (comparaison sur
+# le titre du commit). $1 = dossier de patchs, $2 = dépôt cible.
+apply_patches() {
+  local dir="$1" repo="$2" p subj
+  ls "$dir"/*.patch >/dev/null 2>&1 || return 0
+  echo "  -> ${repo#$SRC/}"
+  for p in "$dir"/*.patch; do
+    subj="$(sed -n 's/^Subject: \[PATCH[^]]*\] //p' "$p" | head -1 | cut -c1-45)"
+    if git -C "$repo" log --format=%s | grep -qF -- "$subj"; then
+      echo "     déjà appliqué : $(basename "$p")"
+    else
+      echo "     application   : $(basename "$p")"
+      git -C "$repo" am --3way "$p"
+    fi
+  done
+}
+apply_patches "$KIT/patches"             "$DEV"
+apply_patches "$KIT/patches/exynos7870"  "$SRC/hardware/samsung_slsi-linaro/exynos7870"
+apply_patches "$KIT/patches/slsi-exynos" "$SRC/hardware/samsung_slsi-linaro/exynos"
 
 # Calibration de l'ampli audio TFA9890 du J5 : le dépôt vendor commun ne contient
 # que Tfa9896.cnt (A3 2017). On la récupère du dump public du firmware officiel

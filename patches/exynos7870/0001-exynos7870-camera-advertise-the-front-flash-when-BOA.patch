@@ -1,0 +1,74 @@
+From 51e9560e9514299fe9a23fe3289b9f6ad0b37370 Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Wed, 4 Nov 2026 15:28:57 +0000
+Subject: [PATCH] exynos7870: camera: advertise the front flash when
+ BOARD_FRONT_CAMERA_HAS_FLASH
+
+The S5K3M3 front module of the j5y17lte has an LED flash (S2MU005
+channel 2, CONFIG_LEDS_SUPPORT_FRONT_FLASH) that the kernel fires for
+AA_FLASHMODE_START/ON with CAM2_FLASH_MODE_LCD, but the HAL3 sensor info
+declared the front camera without flash, so camera apps never offered
+it. Behind a board flag so devices whose front camera has no flash
+(a3y17lte) are unchanged.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ .../SensorInfos/ExynosCamera3SensorInfo.cpp   | 22 +++++++++++++++++++
+ libcamera3/Android.mk                         |  5 +++++
+ 2 files changed, 27 insertions(+)
+
+diff --git a/libcamera/SensorInfos/ExynosCamera3SensorInfo.cpp b/libcamera/SensorInfos/ExynosCamera3SensorInfo.cpp
+index 02f0992..20cc029 100644
+--- a/libcamera/SensorInfos/ExynosCamera3SensorInfo.cpp
++++ b/libcamera/SensorInfos/ExynosCamera3SensorInfo.cpp
+@@ -133,8 +133,30 @@ ExynosCamera3SensorIMX219::ExynosCamera3SensorIMX219() : ExynosCamera3SensorIMX2
+             __FUNCTION__, __LINE__);
+ }
+ 
++#ifdef FRONT_CAMERA_HAS_FLASH
++/* Front module with an LED flash: the kernel (fimc-is + leds-s2mu005,
++ * CONFIG_LEDS_SUPPORT_FRONT_FLASH) fires it for AA_FLASHMODE_START/ON when
++ * ctl.flash.flashMode is CAM2_FLASH_MODE_LCD, which ExynosCameraActivityFlash
++ * sets for the front camera. */
++static uint8_t AVAILABLE_AE_MODES_FRONT_WITH_FLASH[] =
++{
++    ANDROID_CONTROL_AE_MODE_OFF,
++    ANDROID_CONTROL_AE_MODE_ON,
++    ANDROID_CONTROL_AE_MODE_ON_AUTO_FLASH,
++    ANDROID_CONTROL_AE_MODE_ON_ALWAYS_FLASH,
++};
++#endif
++
+ ExynosCamera3SensorS5K3M3::ExynosCamera3SensorS5K3M3(int cameraId) : ExynosCamera3SensorS5K3M3Base(cameraId)
+ {
++#ifdef FRONT_CAMERA_HAS_FLASH
++    if (lensFacing == ANDROID_LENS_FACING_FRONT) {
++        flashAvailable = ANDROID_FLASH_INFO_AVAILABLE_TRUE;
++        aeModes = AVAILABLE_AE_MODES_FRONT_WITH_FLASH;
++        aeModesLength = sizeof(AVAILABLE_AE_MODES_FRONT_WITH_FLASH)
++                        / sizeof(AVAILABLE_AE_MODES_FRONT_WITH_FLASH[0]);
++    }
++#endif
+ }
+ 
+ };
+diff --git a/libcamera3/Android.mk b/libcamera3/Android.mk
+index 7d84994..1ed64b9 100644
+--- a/libcamera3/Android.mk
++++ b/libcamera3/Android.mk
+@@ -79,6 +79,11 @@ LOCAL_CFLAGS += \
+ LOCAL_CFLAGS += -Wno-tautological-compare
+ LOCAL_CFLAGS += -Wno-infinite-recursion
+ 
++# Front camera with an LED flash (e.g. j5y17lte: S2MU005 channel 2)
++ifeq ($(BOARD_FRONT_CAMERA_HAS_FLASH),true)
++LOCAL_CFLAGS += -DFRONT_CAMERA_HAS_FLASH
++endif
++
+ LOCAL_C_INCLUDES += \
+     $(LOCAL_PATH)/../include \
+     $(LOCAL_PATH)/../libcamera3 \
+-- 
+2.43.0
+
