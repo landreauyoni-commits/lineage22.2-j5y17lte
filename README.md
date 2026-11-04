@@ -5,7 +5,7 @@
 | Modèle | **SM-J530F** (aussi J530FM, J530G, J530GM) |
 | Nom de code | `j5y17lte` |
 | SoC | Exynos 7870 · noyau Linux 3.18 · 2 Go RAM · Wi-Fi/BT Broadcom |
-| Statut | **Non officiel. Compile entièrement (4 nov. 2026) ; pas encore testé sur un téléphone** |
+| Statut | **Non officiel. Compile et démarre sur un SM-J530F (4 nov. 2026)** ; matériel en cours de test |
 
 ## D'où vient ce kit
 
@@ -47,8 +47,11 @@ activées : `BPF_SYSCALL`, `CGROUP_BPF`, `BPF_JIT`, `NETFILTER_XT_MATCH_BPF`,
 **ROM complète compilée avec succès** (4 nov. 2026, Google Cloud, Debian 12,
 `LOW_DISK=1`) : `lineage-22.2-20261104-UNOFFICIAL-j5y17lte.zip`, 894 Mo.
 
-Ce qui **n'a pas** été vérifié : le démarrage et le fonctionnement sur un
-vrai téléphone.
+**Démarrage réussi sur un vrai SM-J530F** (4 nov. 2026), bootloader et modem
+d'origine Android 7 (`J530FXXU1AQI3`), avec MindTheGapps 15.
+
+Ce qui **n'a pas encore** été vérifié : le fonctionnement de chaque composant
+(réseau mobile, Wi-Fi, Bluetooth, caméra, audio, GPS, empreinte, NFC…).
 
 ## Contenu
 
@@ -57,6 +60,8 @@ vrai téléphone.
 | `local_manifests/j5y17lte.xml` | Les 12 dépôts à ajouter aux sources LineageOS 22.2 |
 | `patches/0001…0009` | Le portage de l'arbre j5y17lte vers 22.2 |
 | `build.sh` | Tout de A à Z : paquets → `repo sync` → patchs → `mka bacon` |
+| `GUIDE-GOOGLE-CLOUD.md` | Compiler gratuitement sur un serveur Google Cloud (crédit d'essai) |
+| `tools/enable-boot-adb.sh` | Diagnostic du premier démarrage depuis TWRP : ADB sans autorisation + journal persistant (`off` pour désactiver) |
 
 ## Machine nécessaire
 
@@ -110,21 +115,140 @@ plateforme commune, et ses builds tournent.
 
 ## Installer sur le téléphone
 
-> ⚠️ Tout sera effacé. Knox sera grillé définitivement. À vos risques.
+> ⚠️ Tout le contenu du téléphone sera effacé. Knox sera grillé définitivement.
+> À vos risques. Gardez le firmware Samsung d'origine complet du SM-J530F
+> (BL/AP/CP/CSC) : flashé avec Odin, CSC compris, il remet les partitions
+> d'origine en cas de problème.
 
-1. **Sauvegardez vos données**, et dans TWRP faites une **sauvegarde de la
-   partition EFS** (IMEI, Wi-Fi/BT MAC) sur la carte SD ou le PC.
-2. Activez *Options de développement → Déverrouillage OEM*.
-3. Flashez un **TWRP pour j5y17lte** avec Odin (mode Download : Vol- + Home + Power).
-4. La plateforme Exynos 7870 de la communauté a besoin d'une **partition `VENDOR`**
-   (≈ 418 Mo), absente du firmware Samsung. Si vous n'avez jamais installé de
-   LineageOS 18.1/20 de cette communauté, utilisez leur méthode de
-   repartitionnement (TWRP communautaire). Tailles minimales attendues par le
-   build (`BoardConfigCommon.mk`) : SYSTEM ≥ 2 739 Mio, VENDOR ≥ 415 Mio.
-5. Dans TWRP : *Wipe → Format Data* (tapez `yes`), puis *Advanced Wipe* :
-   System, Vendor, Cache, Dalvik.
-6. Flashez le `.zip`. Facultatif : **MindTheGapps 15 arm64** juste après.
-7. Redémarrez. Le premier démarrage peut prendre 5 à 10 minutes.
+Procédure réellement utilisée sur un SM-J530F, sans carte SD, tout par ADB
+depuis un PC Windows ([SDK Platform-Tools](https://developer.android.com/tools/releases/platform-tools)).
+Les commandes `adb` se tapent dans `cmd`, dans le dossier de platform-tools.
+
+### 1. TWRP communautaire
+
+1. *Options de développement → Déverrouillage OEM*.
+2. Flashez le TWRP communautaire **3.7.1_12-0** pour j5y17lte avec Odin, case
+   **AP**, « Auto Reboot » décoché :
+   <https://github.com/samsungexynos7870/android_device_samsung_j5y17lte/releases/download/3.7.1_12-0/recovery.img.tar>
+3. Démarrez directement dedans : Vol- + Power pour éteindre, puis tout de suite
+   **Vol+ + Home + Power**.
+
+### 2. Sauvegarde EFS (IMEI) — fortement conseillée
+
+TWRP ne propose pas EFS dans sa liste et la mémoire interne est illisible
+(0 Mo) tant qu'elle n'est pas formatée : on copie les partitions vers le PC.
+
+```
+adb shell dd if=/dev/block/platform/13540000.dwmmc0/by-name/EFS of=/tmp/efs.img
+adb shell dd if=/dev/block/platform/13540000.dwmmc0/by-name/CPEFS of=/tmp/cpefs.img
+adb pull /tmp/efs.img
+adb pull /tmp/cpefs.img
+```
+
+### 3. Partitions VENDOR et MISC
+
+La plateforme 22.2 a besoin d'une partition `VENDOR` et d'une partition `MISC`,
+absentes du firmware Samsung. On utilise le script de la communauté
+[`repartition-add-misc-and-vendor-lineage-22-2.zip`](https://github.com/Exynos7870-labs/universal_repartition_script7870/releases/download/lineage-22.2/repartition-add-misc-and-vendor-lineage-22-2.zip)
+(SHA-256 `5e9cfdb9179961c3d517674bdd36c73c7949f7cea8a5c5c2f3eb33516a164edc`).
+
+**Ne pas le flasher tel quel** : son programme d'installation est trop ancien
+pour ce TWRP (« Error 7 », appareil « non compatible ») et son script cherche
+`sgdisk` dans `/sbin` alors que ce TWRP l'a dans `/system/bin`. On lance donc le
+script directement :
+
+1. Extrayez `repartition.sh` du zip (clic droit → Extraire tout) dans le
+   dossier de platform-tools.
+2. Vérifiez la table actuelle (gardez une copie du résultat) :
+
+```
+adb shell /system/bin/sgdisk --print /dev/block/mmcblk0
+```
+
+3. Lancez le script :
+
+```
+adb push repartition.sh /tmp/repartition.sh
+adb shell "sed -i 's#^SGDISK=.*#SGDISK=/system/bin/sgdisk#' /tmp/repartition.sh"
+adb shell grep ^SGDISK= /tmp/repartition.sh
+adb shell umount /system /vendor /cache /data
+adb shell /system/bin/bash /tmp/repartition.sh
+adb shell /system/bin/sgdisk --print /dev/block/mmcblk0
+adb reboot recovery
+```
+
+Résultat attendu (16 Go) : partitions 1 à 17 (EFS, modem, bootloader…)
+**inchangées**, puis SYSTEM 4 GiB, VENDOR 512 MiB, CACHE 64 MiB, CP_DEBUG,
+NAD_FW, NAD_REFER, MISC 8 MiB, USERDATA (le reste). HIDDEN disparaît.
+
+### 4. Formater
+
+1. *Wipe → Format Data* → `yes`.
+2. *Wipe → Advanced Wipe* → **System**, puis **Vendor** : *Repair or Change
+   File System → Change File System → EXT4*.
+3. **Cache : formatez-la en ligne de commande**, pas avec TWRP. Le formatage de
+   TWRP a produit un système de fichiers au superbloc invalide ; Android
+   n'arrivait alors pas à monter `/cache`, `installd` ne démarrait jamais et le
+   système plantait en boucle (`SettingsProvider` : `settings.db` introuvable).
+
+```
+adb shell umount /cache
+adb shell /system/bin/mke2fs -F -t ext4 -O ^metadata_csum /dev/block/platform/13540000.dwmmc0/by-name/CACHE
+adb shell /system/bin/e2fsck -fn /dev/block/platform/13540000.dwmmc0/by-name/CACHE
+```
+
+`e2fsck` doit se terminer sans aucune erreur.
+
+### 5. Installer la ROM (et les GApps)
+
+*Advanced → ADB Sideload* → glisser, puis :
+
+```
+adb sideload lineage-22.2-AAAAMMJJ-UNOFFICIAL-j5y17lte.zip
+```
+
+Applications Google (facultatif, **avant** le premier démarrage) :
+MindTheGapps **15** arm64. Son script cherche la partition système dans
+`/dev/block/bootdevice/by-name/system`, qui n'existe pas sur les Exynos
+(« Could not mount /mnt/system », Error 1). Créez ce chemin juste avant,
+**dans la même session TWRP** :
+
+```
+adb shell mkdir -p /dev/block/bootdevice/by-name
+adb shell ln -sf /dev/block/platform/13540000.dwmmc0/by-name/SYSTEM /dev/block/bootdevice/by-name/system
+```
+
+S'il manque de place (« Not enough space ») : *Advanced Wipe → System → Repair
+or Change File System → **Resize File System***, puis recréez le chemin
+ci-dessus. Enfin *ADB Sideload* :
+
+```
+adb sideload MindTheGapps-15.0.0-arm64-….zip
+```
+
+### 6. Premier démarrage
+
+*Reboot → System*. Comptez 5 à 15 minutes.
+
+**S'il ne finit jamais**, récupérez les journaux :
+
+1. Dans TWRP, activez ADB au démarrage et le journal persistant avec
+   [`tools/enable-boot-adb.sh`](tools/enable-boot-adb.sh) :
+
+```
+adb push enable-boot-adb.sh /tmp/
+adb shell sh /tmp/enable-boot-adb.sh
+```
+
+2. Démarrez ; après 3 minutes : `adb logcat -d -b crash > crash.txt` et
+   `adb logcat -d -b all > logcat.txt`. Trace du noyau du démarrage précédent,
+   depuis TWRP : `adb shell cat /proc/last_kmsg`.
+3. **Une fois le problème réglé, désactivez-le** (sinon n'importe quel câble USB
+   donne un accès root sans confirmation) : depuis TWRP,
+   `adb shell sh /tmp/enable-boot-adb.sh off`.
+
+Note : un `Kernel panic` avec `hard_reset_hook_callback` dans `last_kmsg` n'est
+pas un plantage : c'est le redémarrage forcé Vol- + Power.
 
 ## Limites connues
 
@@ -133,3 +257,10 @@ plateforme commune, et ses builds tournent.
   apparaître.
 - Android 15 sur 2 Go de RAM : fluide pour l'usage de base, limité en multitâche.
 - Mises à jour OTA : non (build non officiel), il faut reflasher.
+- Testé avec le bootloader/modem **Android 7** d'origine (`J530FXXU1AQI3`) alors
+  que les blobs viennent du firmware Android 9 (`J530FXXS8CUE4`) : si le réseau
+  mobile ne marche pas, passez d'abord au dernier firmware Samsung Android 9
+  (avant de repartitionner : flasher le firmware complet remet les partitions
+  d'origine).
+- `/cache` est obligatoire dans le `fstab` de la plateforme commune : une
+  partition cache illisible bloque tout le démarrage (voir étape 4).
