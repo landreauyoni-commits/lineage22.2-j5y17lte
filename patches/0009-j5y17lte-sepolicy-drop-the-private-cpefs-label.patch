@@ -1,0 +1,41 @@
+From 6a138e695e8f786fc43551307a0ce5bcf4f73c88 Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Wed, 4 Nov 2026 11:47:35 +0000
+Subject: [PATCH] j5y17lte: sepolicy: drop the private /cpefs label
+
+universal7870-common lineage-22.2 now labels /cpefs(/.*)? as
+sec_efs_file in its vendor policy; the device private efs_file label
+for the same spec made file_contexts.bin generation fail with
+"Multiple different specifications for /cpefs(/.*)?". It was the
+only entry of sepolicy/private, so drop the directory.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ BoardConfig.mk                 | 1 -
+ sepolicy/private/file_contexts | 1 -
+ 2 files changed, 2 deletions(-)
+ delete mode 100644 sepolicy/private/file_contexts
+
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index 4f457f1..e8fed6d 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -104,7 +104,6 @@ TARGET_LD_SHIM_LIBS += \
+     /vendor/lib/libbauthserver.so|/vendor/lib/libbauthtzcommon_shim.so
+ 
+ # Sepolicy
+-SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/private
+ BOARD_SEPOLICY_DIRS += $(DEVICE_PATH)/sepolicy/vendor
+ 
+ # Wifi
+diff --git a/sepolicy/private/file_contexts b/sepolicy/private/file_contexts
+deleted file mode 100644
+index 92c4148..0000000
+--- a/sepolicy/private/file_contexts
++++ /dev/null
+@@ -1 +0,0 @@
+-/cpefs(/.*)?    u:object_r:efs_file:s0
+-- 
+2.43.0
+
