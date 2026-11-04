@@ -1,0 +1,74 @@
+From a96928ba20342820179f67e3008581f6d8b60797 Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Wed, 4 Nov 2026 14:31:10 +0000
+Subject: [PATCH] j5y17lte: wifi: declare the AIDL supplicant and ship the
+ bcmdhd nvram
+
+Android 15 starts wpa_supplicant through
+aidl/android.hardware.wifi.supplicant.ISupplicant/default, while the
+common init.wifi.rc only declares the HIDL interfaces: Wi-Fi turned on
+but never scanned. Add a vendor init service declaring the AIDL one.
+Also install the calibration where the built-in bcmdhd driver looks for
+it (/etc/wifi/nvram_net.txt) and point WIFI_DRIVER_NVRAM_PATH at the
+file the blobs actually ship. Verified on SM-J530F: Wi-Fi works.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ BoardConfig.mk                      |  2 +-
+ configs/wifi/wpa_supplicant_aidl.rc | 10 ++++++++++
+ device.mk                           |  8 ++++++++
+ 3 files changed, 19 insertions(+), 1 deletion(-)
+ create mode 100644 configs/wifi/wpa_supplicant_aidl.rc
+
+diff --git a/BoardConfig.mk b/BoardConfig.mk
+index e8fed6d..76709e0 100644
+--- a/BoardConfig.mk
++++ b/BoardConfig.mk
+@@ -115,7 +115,7 @@ BOARD_HOSTAPD_DRIVER             := NL80211
+ BOARD_HOSTAPD_PRIVATE_LIB        := lib_driver_cmd_bcmdhd
+ WIFI_DRIVER_FW_PATH_PARAM        := "/sys/module/dhd/parameters/firmware_path"
+ WIFI_DRIVER_NVRAM_PATH_PARAM     := "/sys/module/dhd/parameters/nvram_path"
+-WIFI_DRIVER_NVRAM_PATH           := "/vendor/etc/wifi/nvram_net.txt"
++WIFI_DRIVER_NVRAM_PATH           := "/vendor/etc/wifi/nvram.txt"
+ WIFI_DRIVER_FW_PATH_STA          := "/vendor/etc/wifi/bcmdhd_sta.bin"
+ WIFI_DRIVER_FW_PATH_AP           := "/vendor/etc/wifi/bcmdhd_apsta.bin"
+ WIFI_BAND                        := 802_11_ABG
+diff --git a/configs/wifi/wpa_supplicant_aidl.rc b/configs/wifi/wpa_supplicant_aidl.rc
+new file mode 100644
+index 0000000..da4c21b
+--- /dev/null
++++ b/configs/wifi/wpa_supplicant_aidl.rc
+@@ -0,0 +1,10 @@
++# Android 15 starts the supplicant through its AIDL interface; the common
++# init.wifi.rc only declares the legacy HIDL ones.
++service vendor.wpa_supplicant_aidl /vendor/bin/hw/wpa_supplicant \
++    -O/data/vendor/wifi/wpa/sockets -puse_p2p_group_interface=1 \
++    -g@android:wpa_wlan0
++    interface aidl android.hardware.wifi.supplicant.ISupplicant/default
++    socket wpa_wlan0 dgram 660 wifi wifi
++    class main
++    disabled
++    oneshot
+diff --git a/device.mk b/device.mk
+index f5636ed..dfbcdbe 100644
+--- a/device.mk
++++ b/device.mk
+@@ -137,6 +137,14 @@ PRODUCT_PACKAGES += \
+ PRODUCT_COPY_FILES += \
+     $(DEVICE_PATH)/configs/power/powerhint.json:$(TARGET_COPY_OUT_VENDOR)/etc/powerhint.json
+ 
++# Wi-Fi: Android 15 starts wpa_supplicant through its AIDL interface, the
++# common init.wifi.rc only declares the HIDL ones (Wi-Fi never scans).
++# The built-in bcmdhd driver loads its calibration from /etc/wifi/nvram_net.txt
++# (CONFIG_BCMDHD_NVRAM_PATH); the blobs ship /vendor/etc/wifi/nvram.txt.
++PRODUCT_COPY_FILES += \
++    $(DEVICE_PATH)/configs/wifi/wpa_supplicant_aidl.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/wpa_supplicant_aidl.rc \
++    vendor/samsung/j5y17lte/proprietary/vendor/etc/wifi/nvram.txt:$(TARGET_COPY_OUT_SYSTEM)/etc/wifi/nvram_net.txt
++
+ PRODUCT_COPY_FILES += \
+     $(DEVICE_PATH)/configs/wifi/p2p_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/p2p_supplicant_overlay.conf \
+     $(DEVICE_PATH)/configs/wifi/wpa_supplicant_overlay.conf:$(TARGET_COPY_OUT_VENDOR)/etc/wifi/wpa_supplicant_overlay.conf
+-- 
+2.43.0
+

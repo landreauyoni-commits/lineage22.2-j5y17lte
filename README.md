@@ -5,7 +5,7 @@
 | Modèle | **SM-J530F** (aussi J530FM, J530G, J530GM) |
 | Nom de code | `j5y17lte` |
 | SoC | Exynos 7870 · noyau Linux 3.18 · 2 Go RAM · Wi-Fi/BT Broadcom |
-| Statut | **Non officiel. Compile et démarre sur un SM-J530F (4 nov. 2026)** ; matériel en cours de test |
+| Statut | **Non officiel. Compile et démarre sur un SM-J530F (4 nov. 2026)** ; Wi-Fi, Bluetooth, NFC vérifiés, reste du matériel en cours de test |
 
 ## D'où vient ce kit
 
@@ -15,7 +15,7 @@ avec eBPF rétroporté, HAL, blobs). Elle publie des builds 22.2 pour l'**A3 201
 mais l'arbre du **J5 2017** n'existe qu'en `lineage-20`.
 
 Ce kit fige cet arbre `lineage-20` (commit `52defb3`, 4 oct. 2026, déjà
-modernisé pour la plateforme commune 22.2) et y applique 10 patchs (les 7
+modernisé pour la plateforme commune 22.2) et y applique 11 patchs (les 7
 premiers reproduisent les changements faits sur l'A3 pour passer en 22.2) :
 
 | Patch | Changement |
@@ -30,6 +30,7 @@ premiers reproduisent les changements faits sur l'A3 pour passer en 22.2) :
 | 0008 | Bluetooth Broadcom : `libbt-vendor` configuré via Soong (`brcm_libbt`), obligatoire depuis LineageOS 22.2 |
 | 0009 | SELinux : retrait de l'étiquette privée `/cpefs`, en conflit avec celle de la plateforme commune 22.2 |
 | 0010 | `ro.zygote.disable_gl_preload=true` : le pilote Mali efface le registre x18 (ShadowCallStack) et faisait planter Bluetooth et NFC au démarrage |
+| 0011 | Wi-Fi : service `wpa_supplicant` déclaré en AIDL (Android 15) et calibrage `nvram` installé là où le pilote `bcmdhd` le cherche |
 
 Ce qui a été **vérifié** : les 12 dépôts et branches existent, les patchs
 s'appliquent sans conflit, la config noyau `exynos7870-j5y17lte_defconfig`
@@ -51,15 +52,18 @@ activées : `BPF_SYSCALL`, `CGROUP_BPF`, `BPF_JIT`, `NETFILTER_XT_MATCH_BPF`,
 **Démarrage réussi sur un vrai SM-J530F** (4 nov. 2026), bootloader et modem
 d'origine Android 7 (`J530FXXU1AQI3`), avec MindTheGapps 15.
 
-Ce qui **n'a pas encore** été vérifié : le fonctionnement de chaque composant
-(réseau mobile, Wi-Fi, Bluetooth, caméra, audio, GPS, empreinte, NFC…).
+**Vérifié sur le téléphone** : démarrage, Wi-Fi, Bluetooth, NFC (après les
+patchs 0010 et 0011, ou `tools/j5-hotfix.sh` sur une ROM déjà installée).
+
+Ce qui **n'a pas encore** été vérifié : réseau mobile, caméra, audio, GPS,
+empreinte, capteurs.
 
 ## Contenu
 
 | Fichier | Rôle |
 |---|---|
 | `local_manifests/j5y17lte.xml` | Les 12 dépôts à ajouter aux sources LineageOS 22.2 |
-| `patches/0001…0010` | Le portage de l'arbre j5y17lte vers 22.2 |
+| `patches/0001…0011` | Le portage de l'arbre j5y17lte vers 22.2 |
 | `build.sh` | Tout de A à Z : paquets → `repo sync` → patchs → `mka bacon` |
 | `GUIDE-GOOGLE-CLOUD.md` | Compiler gratuitement sur un serveur Google Cloud (crédit d'essai) |
 | `tools/j5-hotfix.sh` | Applique depuis TWRP, sur une ROM déjà installée, les correctifs Bluetooth/NFC (x18) et Wi-Fi (calibrage `nvram`) |
