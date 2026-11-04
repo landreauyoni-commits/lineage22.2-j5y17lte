@@ -5,7 +5,7 @@
 | Modèle | **SM-J530F** (aussi J530FM, J530G, J530GM) |
 | Nom de code | `j5y17lte` |
 | SoC | Exynos 7870 · noyau Linux 3.18 · 2 Go RAM · Wi-Fi/BT Broadcom |
-| Statut | **Non officiel. Compile et démarre sur un SM-J530F (4 nov. 2026)** ; tout le matériel testé fonctionne, sauf le flash avant |
+| Statut | **Non officiel. Compile et démarre sur un SM-J530F (4 nov. 2026)** ; **tout le matériel testé fonctionne**, flash avant compris |
 
 ## D'où vient ce kit
 
@@ -63,7 +63,7 @@ Vérifié ensuite : **appels** (écouteur et haut-parleur), **SMS**, **données
 mobiles**, **capteur de proximité**, **appareils photo** avant et arrière (sauf
 flash avant), **son**, **empreinte digitale**, **rotation de l'écran**,
 **économiseur de batterie** (il ne s'active pas pendant la charge : normal),
-**GPS**.
+**GPS**, **flash avant** (build avec les patchs caméra, installation propre).
 
 ## Contenu
 
@@ -271,12 +271,10 @@ pas un plantage : c'est le redémarrage forcé Vol- + Power.
   apparaître.
 - Android 15 sur 2 Go de RAM : fluide pour l'usage de base, limité en multitâche.
 - Mises à jour OTA : non (build non officiel), il faut reflasher.
-- **Flash avant** (selfie) : indisponible sur la build du 4 nov. 2026 (le pilote
-  caméra, écrit pour l'A3 2017, déclarait la caméra avant sans flash). **Corrigé
-  dans le kit, pas encore testé sur le téléphone** : `patches/exynos7870`
-  déclare le flash pour la caméra avant S5K3M3 et `patches/slsi-exynos` envoie
-  `CAM2_FLASH_MODE_LCD`, le mode pour lequel le noyau (fimc-is + leds-s2mu005)
-  allume la LED avant. Nécessite une recompilation.
+- **Flash avant** (selfie) : corrigé par `patches/exynos7870`, `patches/slsi-exynos`
+  et le patch 0013 (le pilote caméra, écrit pour l'A3 2017, déclarait la caméra
+  avant sans flash et n'envoyait jamais `CAM2_FLASH_MODE_LCD`). Vérifié sur
+  SM-J530F ; les builds antérieures à ces patchs n'ont pas de flash avant.
 - **Modem** : avec le modem Android 7 d'origine (`J530FXXU1AQI3`), le modem ne
   finit jamais de démarrer (`ss310ap_boot_off: T-I-M-E-O-U-T`). Flashez avec Odin
   **uniquement BL et CP** du dernier firmware Samsung Android 9 du SM-J530F
