@@ -1,0 +1,92 @@
+From 92729801d505da486482c15caba452440d83d359 Mon Sep 17 00:00:00 2001
+From: landreauyoni <landreauyoni@gmail.com>
+Date: Wed, 4 Nov 2026 14:58:50 +0000
+Subject: [PATCH] j5y17lte: init: single SIM by default on SM-J530F
+
+Forcing dsds on a single-SIM J530F tells the modem there are two SIM
+slots (ds_detect=2) and starts both rild instances: the SIM is never
+reported (slot 1 stays RADIO_UNAVAILABLE, slot 2 reports ABSENT).
+Verified on SM-J530F: with simslotcount=1 / ss the USIM is detected.
+
+The board has no dual-SIM detect GPIO and /efs/factory.prop (the real
+value) is not mounted when vendor_load_properties runs, so default the
+J530F to one slot, keep two for the other models, and let
+ro.vendor.j5.simslotcount (vendor build.prop, written by
+tools/j5-hotfix.sh from /efs/factory.prop) override it.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01RJQhdtPqbwrS7b75MNooSf
+---
+ init/init_j5y17lte.cpp | 31 +++++++++++++++++++++++++++----
+ 1 file changed, 27 insertions(+), 4 deletions(-)
+
+diff --git a/init/init_j5y17lte.cpp b/init/init_j5y17lte.cpp
+index 76e6f5d..74ac970 100644
+--- a/init/init_j5y17lte.cpp
++++ b/init/init_j5y17lte.cpp
+@@ -77,6 +77,29 @@ void init_dsds() {
+     SetProperty("persist.radio.multisim.config", "dsds");
+ }
+ 
++void init_single_sim() {
++    property_override_dual("ro.multisim.simslotcount", "ro.vendor.multisim.simslotcount", "1");
++    SetProperty("persist.radio.multisim.config", "ss");
++}
++
++/*
++ * Number of SIM slots. The board has no dual-SIM detect GPIO and /efs (whose
++ * factory.prop holds the real value, read by cbd) is not mounted yet when this
++ * runs. Forcing dsds on a single-SIM board leaves the SIM undetected (the modem
++ * and both rild instances are set up for two slots), so:
++ * ro.vendor.j5.simslotcount (vendor build.prop, written by tools/j5-hotfix.sh
++ * from /efs/factory.prop) wins, otherwise the per-model default is used.
++ */
++void init_sim(int def) {
++    std::string count = GetProperty("ro.vendor.j5.simslotcount", "");
++    int slots = (count == "1" || count == "2") ? count[0] - '0' : def;
++
++    if (slots == 2)
++        init_dsds();
++    else
++        init_single_sim();
++}
++
+ void vendor_load_properties()
+ {
+     // Init a dummy BT MAC address, will be overwritten later
+@@ -89,28 +112,28 @@ void vendor_load_properties()
+         property_override_quad("ro.product.model", "ro.product.odm.model", "ro.product.system.model", "ro.product.vendor.model", "SM-J530F");
+         property_override_quad("ro.product.name", "ro.product.odm.name", "ro.product.system.name", "ro.product.vendor.name", "j5y17ltexx");
+ 
+-        init_dsds();
++        init_sim(1);
+ 
+     } else if (bootloader.find("J530GM") == 0) {
+     /* SM-J530GM */
+         property_override_quad("ro.product.model", "ro.product.odm.model", "ro.product.system.model", "ro.product.vendor.model", "SM-J530GM");
+         property_override_quad("ro.product.name", "ro.product.odm.name", "ro.product.system.name", "ro.product.vendor.name", "j5y17ltextc");
+ 
+-        init_dsds();
++        init_sim(2);
+ 
+     } else if (bootloader.find("J530G") == 0) {
+     /* SM-J530G */
+         property_override_quad("ro.product.model", "ro.product.odm.model", "ro.product.system.model", "ro.product.vendor.model", "SM-J530G");
+         property_override_quad("ro.product.name", "ro.product.odm.name", "ro.product.system.name", "ro.product.vendor.name", "j5y17lteub");
+ 
+-        init_dsds();
++        init_sim(2);
+ 
+     } else if (bootloader.find("J530FM") == 0) {
+     /* SM-J530FM */
+         property_override_quad("ro.product.model", "ro.product.odm.model", "ro.product.system.model", "ro.product.vendor.model", "SM-J530FM");
+         property_override_quad("ro.product.name", "ro.product.odm.name", "ro.product.system.name", "ro.product.vendor.name", "j5y17lte");
+ 
+-        init_dsds();
++        init_sim(2);
+     }
+ 
+ 
+-- 
+2.43.0
+

@@ -16,10 +16,17 @@
 #    init.wifi.rc de la plateforme commune ne déclare que les anciennes
 #    interfaces HIDL : le Wi-Fi s'allume sans jamais trouver de réseau.
 #    -> service supplémentaire /vendor/etc/init/wpa_supplicant_aidl.rc
+# 4. SIM : les builds sans le patch 0012 forcent tous les J530F en double SIM ;
+#    sur un J530F mono-SIM le modem et le RIL sont alors mal configurés et la
+#    carte n'est jamais détectée. Le vrai nombre d'emplacements est écrit à
+#    l'usine dans /efs/factory.prop (lu ici en LECTURE SEULE).
+#    -> ro.vendor.j5.simslotcount dans /vendor/build.prop et, si mono-SIM,
+#       règle /vendor/etc/init/zz_j5y17lte_single_sim.rc
 
 BLK=/dev/block/platform/13540000.dwmmc0/by-name
 SYS=${SYS:-/mnt/j5sys}
 VEN=${VEN:-/mnt/j5ven}
+EFS=${EFS:-/mnt/j5efs}
 PROP=ro.zygote.disable_gl_preload=true
 
 if [ -z "$SKIP_MOUNT" ]; then
@@ -28,9 +35,11 @@ if [ -z "$SKIP_MOUNT" ]; then
   mkdir -p "$SYS" "$VEN"
   mount -t ext4 -o rw "$BLK/SYSTEM" "$SYS" || { echo "ERREUR : montage de SYSTEM impossible"; exit 1; }
   mount -t ext4 -o rw "$BLK/VENDOR" "$VEN" || { echo "ERREUR : montage de VENDOR impossible"; umount "$SYS"; exit 1; }
+  umount "$EFS" 2>/dev/null; mkdir -p "$EFS"
+  mount -t ext4 -o ro "$BLK/EFS" "$EFS" || echo "ATTENTION : EFS non lisible, étape SIM ignorée"
 fi
 
-fail() { echo "ERREUR : $1"; [ -z "$SKIP_MOUNT" ] && { umount "$SYS"; umount "$VEN"; }; exit 1; }
+fail() { echo "ERREUR : $1"; [ -z "$SKIP_MOUNT" ] && { umount "$SYS"; umount "$VEN"; umount "$EFS" 2>/dev/null; }; exit 1; }
 
 BP="$SYS/system/build.prop"
 [ -f "$BP" ] || fail "$BP introuvable"
@@ -68,8 +77,41 @@ chmod 0644 "$RC"
 chcon u:object_r:vendor_configs_file:s0 "$RC" 2>/dev/null
 echo "OK : service wpa_supplicant AIDL ajouté ($RC)"
 
+# 4. Nombre d'emplacements SIM (même lecture que cbd : 1er chiffre après le 1er '=')
+SIMS=""
+[ -f "$EFS/factory.prop" ] && SIMS=$(head -c 256 "$EFS/factory.prop" | tr '\n' ' ' | sed -n 's/^[^=]*=\([0-9]\).*/\1/p')
+SRC="$VEN/etc/init/zz_j5y17lte_single_sim.rc"
+VBP="$VEN/build.prop"
+if [ "$SIMS" = 1 ] || [ "$SIMS" = 2 ]; then
+  [ -f "$VBP" ] && { sed -i '/^ro\.vendor\.j5\.simslotcount=/d' "$VBP"; echo "ro.vendor.j5.simslotcount=$SIMS" >> "$VBP"; }
+fi
+if [ "$SIMS" = 1 ]; then
+  cat > "$SRC" <<'EOF'
+# Single-SIM SM-J530F on a build whose init forces two SIM slots
+# (installed by tools/j5-hotfix.sh after reading /efs/factory.prop).
+# Runs after the common rules on the same triggers (parsed later).
+on property:ro.vendor.multisim.simslotcount=*
+    write /sys/module/modem_ctrl_ss310ap/parameters/ds_detect 1
+    setprop persist.radio.multisim.config ss
+
+on property:ro.multisim.simslotcount=*
+    setprop persist.radio.multisim.config ss
+
+on property:init.svc.ril-daemon1=running
+    stop ril-daemon1
+EOF
+  chmod 0644 "$SRC"
+  chcon u:object_r:vendor_configs_file:s0 "$SRC" 2>/dev/null
+  echo "OK : téléphone mono-SIM (factory.prop) -> configuration mono-SIM installée"
+elif [ "$SIMS" = 2 ]; then
+  rm -f "$SRC"
+  echo "OK : téléphone double SIM (factory.prop) -> configuration double SIM conservée"
+else
+  echo "ATTENTION : nombre de SIM introuvable dans /efs/factory.prop, étape SIM ignorée"
+fi
+
 grep -n '^ro\.zygote\.disable_gl_preload=' "$BP"
 ls -l "$SYS/system/etc/wifi/nvram_net.txt"
 sync
-[ -z "$SKIP_MOUNT" ] && { umount "$SYS"; umount "$VEN"; }
+[ -z "$SKIP_MOUNT" ] && { umount "$SYS"; umount "$VEN"; umount "$EFS" 2>/dev/null; }
 exit 0

@@ -15,7 +15,7 @@ avec eBPF rétroporté, HAL, blobs). Elle publie des builds 22.2 pour l'**A3 201
 mais l'arbre du **J5 2017** n'existe qu'en `lineage-20`.
 
 Ce kit fige cet arbre `lineage-20` (commit `52defb3`, 4 oct. 2026, déjà
-modernisé pour la plateforme commune 22.2) et y applique 11 patchs (les 7
+modernisé pour la plateforme commune 22.2) et y applique 12 patchs (les 7
 premiers reproduisent les changements faits sur l'A3 pour passer en 22.2) :
 
 | Patch | Changement |
@@ -31,6 +31,7 @@ premiers reproduisent les changements faits sur l'A3 pour passer en 22.2) :
 | 0009 | SELinux : retrait de l'étiquette privée `/cpefs`, en conflit avec celle de la plateforme commune 22.2 |
 | 0010 | `ro.zygote.disable_gl_preload=true` : le pilote Mali efface le registre x18 (ShadowCallStack) et faisait planter Bluetooth et NFC au démarrage |
 | 0011 | Wi-Fi : service `wpa_supplicant` déclaré en AIDL (Android 15) et calibrage `nvram` installé là où le pilote `bcmdhd` le cherche |
+| 0012 | SIM : le J530F démarre en mono-SIM par défaut (le forcer en double SIM empêchait toute détection de la carte) ; `ro.vendor.j5.simslotcount=2` dans `/vendor/build.prop` pour un J530F/DS |
 
 Ce qui a été **vérifié** : les 12 dépôts et branches existent, les patchs
 s'appliquent sans conflit, la config noyau `exynos7870-j5y17lte_defconfig`
@@ -63,10 +64,10 @@ empreinte, capteurs.
 | Fichier | Rôle |
 |---|---|
 | `local_manifests/j5y17lte.xml` | Les 12 dépôts à ajouter aux sources LineageOS 22.2 |
-| `patches/0001…0011` | Le portage de l'arbre j5y17lte vers 22.2 |
+| `patches/0001…0012` | Le portage de l'arbre j5y17lte vers 22.2 |
 | `build.sh` | Tout de A à Z : paquets → `repo sync` → patchs → `mka bacon` |
 | `GUIDE-GOOGLE-CLOUD.md` | Compiler gratuitement sur un serveur Google Cloud (crédit d'essai) |
-| `tools/j5-hotfix.sh` | Applique depuis TWRP, sur une ROM déjà installée, les correctifs Bluetooth/NFC (x18) et Wi-Fi (calibrage `nvram`) |
+| `tools/j5-hotfix.sh` | Depuis TWRP, sur une ROM déjà installée : correctifs Bluetooth/NFC (x18), Wi-Fi (supplicant AIDL, `nvram`) et SIM (nombre d'emplacements lu dans `/efs/factory.prop`, en lecture seule) |
 | `tools/enable-boot-adb.sh` | Diagnostic du premier démarrage depuis TWRP : ADB sans autorisation + journal persistant (`off` pour désactiver) |
 
 ## Machine nécessaire
