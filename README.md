@@ -65,6 +65,10 @@ flash avant), **son**, **empreinte digitale**, **rotation de l'écran**,
 **économiseur de batterie** (il ne s'active pas pendant la charge : normal),
 **GPS**, **flash avant** (build avec les patchs caméra, installation propre).
 
+Sur une **installation propre** de la build contenant les patchs 0001 à 0013 et
+les patchs caméra, tout fonctionne **sans** `tools/j5-hotfix.sh` (Wi-Fi,
+Bluetooth, NFC, SIM et flash avant confirmés).
+
 ## Contenu
 
 | Fichier | Rôle |
