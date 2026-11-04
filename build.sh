@@ -52,7 +52,7 @@ if [ "${SKIP_SYNC:-0}" != 1 ]; then
   repo sync -c -j"$JOBS" --force-sync --no-clone-bundle --no-tags --optimized-fetch --prune
 fi
 
-step "4/7 Portage de l'arbre j5y17lte vers 22.2 (patches/)"
+step "4/7 Portage vers 22.2 (patches/ + calibration audio TFA9890)"
 DEV="$SRC/device/samsung/j5y17lte"
 # Applique chaque patch qui ne l'est pas encore (comparaison sur le titre du commit).
 for p in "$KIT"/patches/*.patch; do
@@ -64,6 +64,24 @@ for p in "$KIT"/patches/*.patch; do
     git -C "$DEV" am --3way "$p"
   fi
 done
+
+# Calibration de l'ampli audio TFA9890 du J5 : le dépôt vendor commun ne contient
+# que Tfa9896.cnt (A3 2017). On la récupère du dump public du firmware officiel
+# J530FXXS8CUE4 (commit figé) et on vérifie son empreinte.
+TFA="$SRC/vendor/samsung/universal7870-common/audio/sec_tfa/proprietary/vendor/etc/Tfa9890.cnt"
+TFA_URL="https://raw.githubusercontent.com/Exynos7870-labs/samsung_j5y17lte_dump/73ad4c2db861d352333854510c958f25e18002fb/system/vendor/etc/Tfa9890.cnt"
+TFA_SHA256="de2810e0398b38213d386308a2c42f810059a0dd09803abe40cdd73305c3842e"
+if echo "$TFA_SHA256  $TFA" | sha256sum -c --status 2>/dev/null; then
+  echo "  déjà présent  : Tfa9890.cnt"
+else
+  echo "  téléchargement : Tfa9890.cnt (calibration de l'ampli audio)"
+  mkdir -p "$(dirname "$TFA")"
+  curl -fsSL -o "$TFA.tmp" "$TFA_URL"
+  if ! echo "$TFA_SHA256  $TFA.tmp" | sha256sum -c --status; then
+    rm -f "$TFA.tmp"; echo "ERREUR : empreinte de Tfa9890.cnt incorrecte"; exit 1
+  fi
+  mv "$TFA.tmp" "$TFA"
+fi
 
 if [ "${REGEN_BLOBS:-0}" = 1 ]; then
   step "5/7 Régénération des blobs depuis les dumps J530F publics"
