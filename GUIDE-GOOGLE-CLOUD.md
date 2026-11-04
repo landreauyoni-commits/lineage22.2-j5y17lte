@@ -70,7 +70,7 @@ sudo apt-get update && sudo apt-get install -y git tmux
 ```
 
 ```bash
-git clone https://github.com/landreauyoni-commits/lineage22.2-j5y17lte
+git clone https://github.com/pascalavie/lineage22.2-j5y17lte
 ```
 
 ```bash
