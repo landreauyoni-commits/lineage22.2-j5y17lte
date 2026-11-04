@@ -5,7 +5,7 @@
 | Modèle | **SM-J530F** (aussi J530FM, J530G, J530GM) |
 | Nom de code | `j5y17lte` |
 | SoC | Exynos 7870 · noyau Linux 3.18 · 2 Go RAM · Wi-Fi/BT Broadcom |
-| Statut | **Non officiel. Compile et démarre sur un SM-J530F (4 nov. 2026)** ; Wi-Fi, Bluetooth, NFC vérifiés, reste du matériel en cours de test |
+| Statut | **Non officiel. Compile et démarre sur un SM-J530F (4 nov. 2026)** ; Wi-Fi, Bluetooth, NFC, carte SIM vérifiés, reste du matériel en cours de test |
 
 ## D'où vient ce kit
 
@@ -53,11 +53,13 @@ activées : `BPF_SYSCALL`, `CGROUP_BPF`, `BPF_JIT`, `NETFILTER_XT_MATCH_BPF`,
 **Démarrage réussi sur un vrai SM-J530F** (4 nov. 2026), bootloader et modem
 d'origine Android 7 (`J530FXXU1AQI3`), avec MindTheGapps 15.
 
-**Vérifié sur le téléphone** : démarrage, Wi-Fi, Bluetooth, NFC (après les
-patchs 0010 et 0011, ou `tools/j5-hotfix.sh` sur une ROM déjà installée).
+**Vérifié sur le téléphone** : démarrage, Wi-Fi, Bluetooth, NFC, détection de
+la carte SIM (après les patchs 0010 à 0012, ou `tools/j5-hotfix.sh` sur une
+ROM déjà installée), avec bootloader/modem mis à jour en `J530FXXS9CUE5`
+(BL + CP du firmware Android 9 flashés seuls avec Odin).
 
-Ce qui **n'a pas encore** été vérifié : réseau mobile, caméra, audio, GPS,
-empreinte, capteurs.
+Ce qui **n'a pas encore** été vérifié : appels, SMS, données mobiles, caméra,
+audio, GPS, empreinte, capteurs.
 
 ## Contenu
 
@@ -264,10 +266,10 @@ pas un plantage : c'est le redémarrage forcé Vol- + Power.
   apparaître.
 - Android 15 sur 2 Go de RAM : fluide pour l'usage de base, limité en multitâche.
 - Mises à jour OTA : non (build non officiel), il faut reflasher.
-- Testé avec le bootloader/modem **Android 7** d'origine (`J530FXXU1AQI3`) alors
-  que les blobs viennent du firmware Android 9 (`J530FXXS8CUE4`) : si le réseau
-  mobile ne marche pas, passez d'abord au dernier firmware Samsung Android 9
-  (avant de repartitionner : flasher le firmware complet remet les partitions
-  d'origine).
+- **Modem** : avec le modem Android 7 d'origine (`J530FXXU1AQI3`), le modem ne
+  finit jamais de démarrer (`ss310ap_boot_off: T-I-M-E-O-U-T`). Flashez avec Odin
+  **uniquement BL et CP** du dernier firmware Samsung Android 9 du SM-J530F
+  (testé : `J530FXXS9CUE5`) : partitions, ROM et données restent en place. Ne
+  flashez **ni AP ni CSC** (le CSC remettrait les partitions d'origine).
 - `/cache` est obligatoire dans le `fstab` de la plateforme commune : une
   partition cache illisible bloque tout le démarrage (voir étape 4).
